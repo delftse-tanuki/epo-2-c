@@ -3,4 +3,4 @@ project(src C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(src main.c)
+add_executable(src main.c backend/lee.c backend/lee.h)
