@@ -28,7 +28,7 @@ int maze[MAZE_WIDTH][MAZE_HEIGHT] = {
 int directions_x[4] = {0, 1, 0, -1};
 int directions_y[4] = {1, 0, -1, 0};
 
-int calc_turns(struct Paths *path) {
+int calc_turns(struct Path *path) {
     int turns = 0;
 for(int i = 0; i < path->length - 2; i++) {
         int x1 = path->path[i].x;
@@ -73,17 +73,21 @@ void trace_nodes(struct Node *current) {
     }
 }
 
-void create_paths(struct Node *current, struct Paths *paths) {
-    paths->path[paths->length++] = current->point;
-    for(int i = 0; i < current->options; i++) {
-        struct Node *next = current->next[i];
-        struct Paths *path = malloc(sizeof(struct Paths));
-        path->length = paths->length;
-        memcpy(path->path, paths->path, sizeof(paths->path));
-        paths->next = path;
-        create_paths(next, paths);
+void create_paths(struct Node *current, struct Path path, struct Paths *paths) {
+    if(current == NULL) {
+        return;
     }
 
+    path.path[path.length++] = current->point;
+
+    if(current->options == 0) {
+        memcpy(&paths->path[paths->length], &path, sizeof(struct Path));
+        paths->path[paths->length].length = path.length;
+        paths->length++;
+    }
+    for(int i = 0; i < current->options; i++) {
+        create_paths(current->next[i], path, paths);
+    }
 }
 
 struct Paths lee_algorithm(struct Point source, struct Point target) {
@@ -115,9 +119,10 @@ struct Paths lee_algorithm(struct Point source, struct Point target) {
         }
     }
     struct Paths paths = {0};
+    struct Path path = {0};
     struct Node current = {source, maze[source.x][source.y]};
     trace_nodes(&current);
-    create_paths(&current, &paths);
+    create_paths(&current, path, &paths);
 
     return paths;
 }

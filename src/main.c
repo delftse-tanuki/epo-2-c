@@ -22,21 +22,35 @@ int main() {
     }
 
     printf("\n\nTime: %lld", end - start);
-    printf("\nPath length: %d", path.length);
-    printf("\nPath: ");
+    printf("\nPaths found: %d", path.length);
     for(int i = 0; i < path.length; i++) {
-        printf("(%d, %d) ", path.path[i].x, path.path[i].y);
+        printf("\nPath %d (Turns %d): ", i + 1, calc_turns(&path.path[i]));
+        for(int j = 0; j < path.path[i].length; j++) {
+            printf("(%d, %d), ", path.path[i].path[j].x, path.path[i].path[j].y);
+        }
     }
-    printf("\nTurns: %d", calc_turns(&path));
-
-    int path_map[MAZE_WIDTH][MAZE_HEIGHT] = {0};
-    for(int i = 0; i < path.length; i++) {
-        path_map[path.path[i].x][path.path[i].y] = 1;
+    int fake_map[13][13] = {
+            {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+            {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+            {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
+            {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+            {-1, -1, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1, -1},
+            {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+            {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1}
+    };
+    for(int i = 0; i < path.path[5].length; i++) {
+        fake_map[path.path[5].path[i].x][path.path[5].path[i].y] = 1;
     }
     printf("\n\n");
     for(int row = 0; row < MAZE_WIDTH; row++) {
         for(int col = 0; col < MAZE_HEIGHT; col++) {
-            printf("%d,\t", path_map[col][row]);
+            printf("%d,\t", fake_map[col][row]);
         }
         printf("\n");
     }

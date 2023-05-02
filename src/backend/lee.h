@@ -26,15 +26,14 @@ struct Path {
 };
 
 struct Paths {
-    struct Point path[20];
+    struct Path path[20];
     int length;
-    struct Paths *next;
 };
 
 extern int maze[MAZE_WIDTH][MAZE_HEIGHT];
 
 extern struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
 
-extern int calc_turns(struct Paths *path);
+extern int calc_turns(struct Path *path);
 
 #endif //SRC_LEE_H
