@@ -11,7 +11,7 @@ int main() {
         printf("\n");
     }
     long long start = GetTickCount();
-    struct Path path = lee(10, 10, 10, 2);
+    struct Paths path = lee(10, 10, 10, 2);
     long long end = GetTickCount();
     printf("\n");
     for(int row = 0; row < MAZE_WIDTH; row++) {
@@ -25,13 +25,13 @@ int main() {
     printf("\nPath length: %d", path.length);
     printf("\nPath: ");
     for(int i = 0; i < path.length; i++) {
-        printf("(%d, %d) ", path.points[i].x, path.points[i].y);
+        printf("(%d, %d) ", path.path[i].x, path.path[i].y);
     }
-    printf("\nTurns: %d", calc_turns(path));
+    printf("\nTurns: %d", calc_turns(&path));
 
     int path_map[MAZE_WIDTH][MAZE_HEIGHT] = {0};
     for(int i = 0; i < path.length; i++) {
-        path_map[path.points[i].x][path.points[i].y] = 1;
+        path_map[path.path[i].x][path.path[i].y] = 1;
     }
     printf("\n\n");
     for(int row = 0; row < MAZE_WIDTH; row++) {

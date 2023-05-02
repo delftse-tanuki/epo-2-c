@@ -16,17 +16,25 @@ struct Point {
 struct Node {
     struct Point point;
     int distance;
+    int options;
+    struct Node *next[4];
 };
 
 struct Path {
-    struct Point points[MAZE_WIDTH * MAZE_HEIGHT];
+    struct Point path[20];
     int length;
+};
+
+struct Paths {
+    struct Point path[20];
+    int length;
+    struct Paths *next;
 };
 
 extern int maze[MAZE_WIDTH][MAZE_HEIGHT];
 
-extern struct Path lee(int sourceX, int sourceY, int destinationX, int destinationY);
+extern struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
 
-extern int calc_turns(struct Path path);
+extern int calc_turns(struct Paths *path);
 
 #endif //SRC_LEE_H
