@@ -4,23 +4,41 @@
 #include "backend/lee.h"
 
 int main() {
-    for(int i = 0; i < 169; i++) {
-        if(i % 13 == 0) {
-            printf("\n");
+    for(int row = 0; row < MAZE_WIDTH; row++) {
+        for(int col = 0; col < MAZE_HEIGHT; col++) {
+            printf("%d,\t", maze[col][row]);
         }
-        printf("%d,\t", lee_map[i]);
+        printf("\n");
     }
     long long start = GetTickCount();
-    lee(0, 0, 1, 3);
+    struct Path path = lee(10, 10, 10, 2);
     long long end = GetTickCount();
     printf("\n");
-    for(int i = 0; i < 169; i++) {
-        if(i % 13 == 0) {
-            printf("\n");
+    for(int row = 0; row < MAZE_WIDTH; row++) {
+        for(int col = 0; col < MAZE_HEIGHT; col++) {
+            printf("%d,\t", maze[col][row]);
         }
-        printf("%d,\t", lee_map[i]);
+        printf("\n");
     }
 
     printf("\n\nTime: %lld", end - start);
+    printf("\nPath length: %d", path.length);
+    printf("\nPath: ");
+    for(int i = 0; i < path.length; i++) {
+        printf("(%d, %d) ", path.points[i].x, path.points[i].y);
+    }
+    printf("\nTurns: %d", calc_turns(path));
+
+    int path_map[MAZE_WIDTH][MAZE_HEIGHT] = {0};
+    for(int i = 0; i < path.length; i++) {
+        path_map[path.points[i].x][path.points[i].y] = 1;
+    }
+    printf("\n\n");
+    for(int row = 0; row < MAZE_WIDTH; row++) {
+        for(int col = 0; col < MAZE_HEIGHT; col++) {
+            printf("%d,\t", path_map[col][row]);
+        }
+        printf("\n");
+    }
     return 0;
 }
