@@ -5,35 +5,11 @@
 #ifndef SRC_LEE_H
 #define SRC_LEE_H
 
-#define MAZE_WIDTH 13
-#define MAZE_HEIGHT 13
+#include "common/point.h"
+#include "common/path.h"
 
-struct Point {
-    int x;
-    int y;
-};
-
-struct Node {
-    struct Point point;
-    int distance;
-    int options;
-    struct Node *next[4];
-};
-
-struct Path {
-    struct Point path[20];
-    int length;
-};
-
-struct Paths {
-    struct Path path[20];
-    int length;
-};
-
-extern int maze[MAZE_WIDTH][MAZE_HEIGHT];
-
-extern struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
-
-extern int calc_turns(struct Path *path);
+struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
+void reset_lee_maze();
+void lee_add_mine(struct Point *point);
 
 #endif //SRC_LEE_H

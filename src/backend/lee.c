@@ -8,45 +8,18 @@
 #include <stdio.h>
 #include "lee.h"
 
-int maze[MAZE_WIDTH][MAZE_HEIGHT] = {
-        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
-        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
-        {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
-        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
-        {-1, -1, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1, -1},
-        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
-        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1}
-};
+int lee_maze[MAZE_WIDTH][MAZE_HEIGHT];
 
 // Directions: 0 = North, 1 = East, 2 = South, 3 = West
 int directions_x[4] = {0, 1, 0, -1};
 int directions_y[4] = {1, 0, -1, 0};
 
-int calc_turns(struct Path *path) {
-    int turns = 0;
-for(int i = 0; i < path->length - 2; i++) {
-        int x1 = path->path[i].x;
-        int y1 = path->path[i].y;
-        int x2 = path->path[i + 1].x;
-        int y2 = path->path[i + 1].y;
-        int x3 = path->path[i + 2].x;
-        int y3 = path->path[i + 2].y;
-        if(x1 == x2 && x2 == x3) {
-            continue;
-        }
-        if(y1 == y2 && y2 == y3) {
-            continue;
-        }
-        turns++;
-    }
-    return turns;
-}
+struct Node {
+    struct Point point;
+    int distance;
+    int options;
+    struct Node *next[4];
+};
 
 void trace_nodes(struct Node *current) {
     if(current->distance <= 1) {
@@ -55,12 +28,12 @@ void trace_nodes(struct Node *current) {
     int options = 0;
     for(int i = 0; i < 4; i++) {
         struct Point next = {current->point.x + directions_x[i], current->point.y + directions_y[i]};
-        if(next.x < 0 || next.x >= MAZE_WIDTH || next.y < 0 || next.y >= MAZE_HEIGHT) {
+        if(!point_is_valid(&next)) {
             continue;
         }
-        if(maze[next.x][next.y] == current->distance - 1) {
+        if(lee_maze[next.x][next.y] == current->distance - 1) {
             struct Node *next_node = malloc(sizeof(struct Node));
-            next_node->distance = maze[next.x][next.y];
+            next_node->distance = lee_maze[next.x][next.y];
             next_node->point = next;
             next_node->options = 0;
             memset(next_node->next, 0, sizeof(next_node->next));
@@ -73,8 +46,8 @@ void trace_nodes(struct Node *current) {
     }
 }
 
-void create_paths(struct Node *current, struct Path path, struct Paths *paths) {
-    if(current == NULL) {
+void initialize_paths(struct Node *current, struct Path path, struct Paths *paths) {
+    if(current == NULL || paths->length == MAX_PATH_LENGTH) {
         return;
     }
 
@@ -82,15 +55,16 @@ void create_paths(struct Node *current, struct Path path, struct Paths *paths) {
 
     if(current->options == 0) {
         memcpy(&paths->path[paths->length], &path, sizeof(struct Path));
+        paths->path[paths->length].turns = calc_turns(&path);
         paths->path[paths->length].length = path.length;
         paths->length++;
     }
     for(int i = 0; i < current->options; i++) {
-        create_paths(current->next[i], path, paths);
+        initialize_paths(current->next[i], path, paths);
     }
 }
 
-struct Paths lee_algorithm(struct Point source, struct Point target) {
+void populate_map(struct Point source, struct Point target) {
     bool visited[MAZE_WIDTH][MAZE_HEIGHT];
     for(int i = 0; i < MAZE_WIDTH; i++) {
         for(int j = 0; j < MAZE_HEIGHT; j++) {
@@ -102,33 +76,44 @@ struct Paths lee_algorithm(struct Point source, struct Point target) {
     int queue_start = 0;
     int queue_end = 0;
     queue[queue_end++] = (struct Node) {target, 1};
-    maze[target.x][target.y] = 1;
-    while(maze[source.x][source.y] == 0 && queue_start != queue_end) {
+    lee_maze[target.x][target.y] = 1;
+    while(lee_maze[source.x][source.y] == 0 && queue_start != queue_end) {
         struct Node current = queue[queue_start++];
         for(int i = 0; i < 4; i++) {
             struct Point next = {current.point.x + directions_x[i], current.point.y + directions_y[i]};
-            if(next.x < 0 || next.x >= MAZE_WIDTH || next.y < 0 || next.y >= MAZE_HEIGHT) {
+            if(!point_is_valid(&next)) {
                 continue;
             }
-            if(visited[next.x][next.y] || maze[next.x][next.y] == -1) {
+            if(visited[next.x][next.y] || lee_maze[next.x][next.y] == -1) {
                 continue;
             }
             visited[next.x][next.y] = true;
             queue[queue_end++] = (struct Node) {next, current.distance + 1};
-            maze[next.x][next.y] = current.distance + 1;
+            lee_maze[next.x][next.y] = current.distance + 1;
         }
     }
+}
+
+struct Paths calculate_paths(struct Point source) {
     struct Paths paths = {0};
     struct Path path = {0};
-    struct Node current = {source, maze[source.x][source.y]};
+    struct Node current = {source, lee_maze[source.x][source.y]};
     trace_nodes(&current);
-    create_paths(&current, path, &paths);
-
+    initialize_paths(&current, path, &paths);
     return paths;
 }
 
 struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY) {
     struct Point source = {sourceX, sourceY};
     struct Point dest = {destinationX, destinationY};
-    return lee_algorithm(source, dest);
+    populate_map(source, dest);
+    return calculate_paths(source);
+}
+
+void reset_lee_maze() {
+    memcpy(lee_maze, maze, sizeof(maze));
+}
+
+void lee_add_mine(struct Point *point) {
+    lee_maze[point->x][point->y] = -1;
 }
