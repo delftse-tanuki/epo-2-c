@@ -42,10 +42,13 @@ void print_path(struct Path *path) {
     for(int i = 0; i < path->length; i++) {
         path_maze[path->path[i].x][path->path[i].y] = 1;
     }
-    for(int row = 0; row < MAZE_WIDTH; row++) {
+    for(int row = MAZE_WIDTH - 1; row >= 0; row--) {
+        printf("%2d ", row);
         for(int col = 0; col < MAZE_HEIGHT; col++) {
             printf("%c", path_maze[col][row] == -1 ? 'o' : path_maze[col][row] == 0 ? ' ' : '*');
         }
         printf("\n");
     }
+    printf("   %s", "ABCDEFGHIJKLM");
+    printf("\n%d", path_maze[0][12]);
 }

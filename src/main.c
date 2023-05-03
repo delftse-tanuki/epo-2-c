@@ -9,7 +9,7 @@ int main() {
     lee_add_mine(&(struct Point){.x = 5, .y = 10});
     lee_add_mine(&(struct Point){.x = 10, .y = 5});
     long long start = GetTickCount();
-    struct Paths path = lee(10, 10, 2, 2);
+    struct Paths path = lee(9, 10, 2, 2);
     long long end = GetTickCount();
 
     printf("Time: %lld\n", end - start);

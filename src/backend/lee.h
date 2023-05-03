@@ -5,7 +5,6 @@
 #ifndef SRC_LEE_H
 #define SRC_LEE_H
 
-#include "common/point.h"
 #include "common/path.h"
 
 struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
