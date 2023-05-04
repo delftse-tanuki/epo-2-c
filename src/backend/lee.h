@@ -7,7 +7,7 @@
 
 #include "common/path.h"
 
-struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY);
+struct PathList lee(int sourceX, int sourceY, int destinationX, int destinationY);
 void reset_lee_maze();
 void lee_add_mine(struct Point *point);
 

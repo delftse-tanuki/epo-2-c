@@ -7,21 +7,21 @@
 
 #include "point.h"
 
-#define MAX_PATH_LENGTH 100
+#define MAX_PATH_AMOUNT 100
 
 struct Path {
-    struct Point path[20];
+    struct Point points[20];
     int length;
     int turns;
 };
 
-struct Paths {
-    struct Path path[MAX_PATH_LENGTH];
+struct PathList {
+    struct Path path[MAX_PATH_AMOUNT];
     int length;
 };
 
 int calc_turns(struct Path *path);
-struct Path select_path(struct Paths *paths);
+struct Path select_path(struct PathList *paths);
 void print_path(struct Path *path);
 
 #endif //SRC_PATH_H

@@ -6,7 +6,6 @@
 #define SRC_POINT_H
 
 #include <stdbool.h>
-#include "maze.h"
 
 struct Point {
     int x;

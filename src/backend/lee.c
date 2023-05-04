@@ -8,13 +8,31 @@
 #include <stdio.h>
 #include "lee.h"
 
-int lee_maze[MAZE_WIDTH][MAZE_HEIGHT];
+#define MAZE_SIZE 13
+
+const int maze_template[MAZE_SIZE][MAZE_SIZE] = {
+        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+        {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
+        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {-1, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, -1},
+        {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
+        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
+        {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1}
+};
+
+int lee_maze[MAZE_SIZE][MAZE_SIZE];
 
 // Directions: 0 = North, 1 = East, 2 = South, 3 = West
 int directions_x[4] = {0, 1, 0, -1};
 int directions_y[4] = {1, 0, -1, 0};
 
-struct Node {
+struct Node { // the structure for the search tree of all possible paths
     struct Point point;
     int distance;
     int options;
@@ -46,28 +64,28 @@ void trace_nodes(struct Node *current) {
     }
 }
 
-void initialize_paths(struct Node *current, struct Path path, struct Paths *paths) {
-    if(current == NULL || paths->length == MAX_PATH_LENGTH) {
+void initialize_paths(struct Node *current, struct Path path, struct PathList *pathList) {
+    if(current == NULL || pathList->length == MAX_PATH_AMOUNT) {
         return;
     }
 
-    path.path[path.length++] = current->point;
+    path.points[path.length++] = current->point;
 
     if(current->options == 0) {
-        memcpy(&paths->path[paths->length], &path, sizeof(struct Path));
-        paths->path[paths->length].turns = calc_turns(&path);
-        paths->path[paths->length].length = path.length;
-        paths->length++;
+        memcpy(&pathList->path[pathList->length], &path, sizeof(struct Path));
+        pathList->path[pathList->length].turns = calc_turns(&path);
+        pathList->path[pathList->length].length = path.length;
+        pathList->length++;
     }
     for(int i = 0; i < current->options; i++) {
-        initialize_paths(current->next[i], path, paths);
+        initialize_paths(current->next[i], path, pathList);
     }
 }
 
 void populate_map(struct Point source, struct Point target) {
-    bool visited[MAZE_WIDTH][MAZE_HEIGHT];
-    for(int i = 0; i < MAZE_WIDTH; i++) {
-        for(int j = 0; j < MAZE_HEIGHT; j++) {
+    bool visited[MAZE_SIZE][MAZE_SIZE];
+    for(int i = 0; i < MAZE_SIZE; i++) {
+        for(int j = 0; j < MAZE_SIZE; j++) {
             visited[i][j] = false;
         }
     }
@@ -94,8 +112,8 @@ void populate_map(struct Point source, struct Point target) {
     }
 }
 
-struct Paths calculate_paths(struct Point source) {
-    struct Paths paths = {0};
+struct PathList calculate_paths(struct Point source) {
+    struct PathList paths = {0};
     struct Path path = {0};
     struct Node current = {source, lee_maze[source.x][source.y]};
     trace_nodes(&current);
@@ -103,7 +121,7 @@ struct Paths calculate_paths(struct Point source) {
     return paths;
 }
 
-struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY) {
+struct PathList lee(int sourceX, int sourceY, int destinationX, int destinationY) {
     struct Point source = {sourceX, sourceY};
     struct Point dest = {destinationX, destinationY};
     populate_map(source, dest);
@@ -111,7 +129,7 @@ struct Paths lee(int sourceX, int sourceY, int destinationX, int destinationY) {
 }
 
 void reset_lee_maze() {
-    memcpy(lee_maze, maze, sizeof(maze));
+    memcpy(lee_maze, maze_template, sizeof(maze_template));
 }
 
 void lee_add_mine(struct Point *point) {
