@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "backend/lee.h"
+#include "frontend/cli.h"
 
 int main() {
     reset_lee_maze();
@@ -16,5 +17,7 @@ int main() {
         printf("(%d, %d), ", selectedPath.points[i].x, selectedPath.points[i].y);
     }
     printf("\n\n");
+
+    init_CLI();
     return 0;
 }
