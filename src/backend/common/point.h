@@ -12,6 +12,11 @@ struct Point {
     int y;
 };
 
+struct PointConnection {
+    struct Point point1;
+    struct Point point2;
+};
+
 bool point_is_valid(struct Point *point);
 
 #endif //SRC_POINT_H
