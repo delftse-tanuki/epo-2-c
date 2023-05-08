@@ -121,10 +121,8 @@ struct PathList calculate_paths(struct Point source) {
     return paths;
 }
 
-struct PathList lee(int sourceX, int sourceY, int destinationX, int destinationY) {
-    struct Point source = {sourceX, sourceY};
-    struct Point dest = {destinationX, destinationY};
-    populate_map(source, dest);
+struct PathList lee(struct Point source, struct Point target) {
+    populate_map(source, target);
     return calculate_paths(source);
 }
 

@@ -5,9 +5,9 @@
 #ifndef SRC_LEE_H
 #define SRC_LEE_H
 
-#include "common/path.h"
+#include "../common/path.h"
 
-struct PathList lee(int sourceX, int sourceY, int destinationX, int destinationY);
+struct PathList lee(struct Point source, struct Point target);
 void reset_lee_maze();
 void lee_add_mine(struct Point *point);
 

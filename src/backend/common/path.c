@@ -24,13 +24,3 @@ int calc_turns(struct Path *path) {
     }
     return turns;
 }
-
-struct Path select_path(struct PathList *paths) {
-    struct Path best_path = paths->path[0];
-    for(int i = 1; i < paths->length; i++) {
-        if(paths->path[i].turns < best_path.turns) {
-            best_path = paths->path[i];
-        }
-    }
-    return best_path;
-}

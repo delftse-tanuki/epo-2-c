@@ -21,7 +21,5 @@ struct PathList {
 };
 
 int calc_turns(struct Path *path);
-struct Path select_path(struct PathList *paths);
-void print_path(struct Path *path);
 
 #endif //SRC_PATH_H
