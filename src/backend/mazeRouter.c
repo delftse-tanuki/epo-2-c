@@ -30,6 +30,14 @@ void init_maze_router() {
     mines.length = 0;
 }
 
+struct Point index_to_crossing(int x, int y) {
+    return crossings[x][y];
+}
+
+struct Point index_to_station(int index) {
+    return stations[index];
+}
+
 struct PathList calculate_route(struct Point *source, struct Point *destination) {
     reset_lee_maze();
     for(int i = 0; i < mines.length; i++) {

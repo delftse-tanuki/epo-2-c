@@ -13,10 +13,10 @@ int nextInstruction;
 
 /* Determine the orientation of the robot based on the last two crossings. */
 void determineFacing(struct Point currentPoint, struct Point nextPoint, int *facing) {
-    if(currentPoint.x == nextPoint.x) {
+    if(currentPoint.y == nextPoint.y) {
         /* The robot is driving vertical */
 
-        if(currentPoint.y < nextPoint.y) {
+        if(currentPoint.x < nextPoint.x) {
             /* The robot is driving SOUTH */
             *facing = 2;
         } else {
@@ -27,7 +27,7 @@ void determineFacing(struct Point currentPoint, struct Point nextPoint, int *fac
     } else {
         /* The car is driving horizontal */
 
-        if(currentPoint.x < nextPoint.x) {
+        if(currentPoint.y < nextPoint.y) {
             /* The robot is driving EAST */
             *facing = 1;
         } else {
@@ -62,8 +62,10 @@ void executePath(/*HANDLE hSerial, */struct Path path) {
 
     for(i; i < path.length; i++) {
 
-        if(path.length <= 2) {
+        if(path.length - i <= 2) {
+            nextInstruction = 4; // Stop instruction
             //writeByte(hSerial, 00) /* If there are two points left, the instruction is always go forward */
+            printf("%d, ", nextInstruction);
             break;
         }
 

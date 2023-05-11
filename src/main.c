@@ -3,6 +3,7 @@
 #include "backend/algorithms/lee.h"
 #include "frontend/cli.h"
 #include "backend/mazeRouter.h"
+#include "backend/uart/uartHandler.h"
 
 int main() {
     reset_lee_maze();
@@ -19,6 +20,7 @@ int main() {
     }
     printf("\n\n");
 
-    init_CLI();
+    uartHandler();
+    //init_CLI();
     return 0;
 }

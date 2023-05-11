@@ -5,18 +5,21 @@
 #include <string.h>
 #include <ctype.h>
 #include "../backend/mazeRouter.h"
+#include "../backend/uart/uartHandler.h"
 
 int running = 1;
 
 void challenge_a() {
-    printf("Starting challenge A...\n");
+    printf("Starting challenge A/B...\n");
     printf("What is the source station (x): ");
     int source;
     scanf("%d", &source);
     printf("What is the destination station (x): ");
     int destination;
     scanf("%d", &destination);
-    struct PathList pathList = calculate_route(&source, &destination);
+    struct Point sourceStation = index_to_station(source);
+    struct Point destinationStation = index_to_station(destination);
+    struct PathList pathList = calculate_route(&sourceStation, &destinationStation);
     struct Path best_path = select_path(&pathList);
 
     printf("Paths found: %d\n", pathList.length);
@@ -28,7 +31,7 @@ void challenge_a() {
 }
 
 void challenge_b() {
-
+    uartHandler();
 }
 
 void challenge_c() {
@@ -42,7 +45,7 @@ void handle_start() {
     if (toupper(challenge) == 'A' ) {
         challenge_a();
     } else if (toupper(challenge) == 'B') {
-        printf("Starting challenge B...\n");
+        challenge_b();
     } else if (toupper(challenge) == 'C') {
         printf("Starting challenge C...\n");
     } else {
