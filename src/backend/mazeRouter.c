@@ -43,6 +43,27 @@ void add_mine(struct Point *point) {
     lee_add_mine(point);
 }
 
+void point_connection_mine(struct PointConnection *connection) {
+    struct Point mine = connection->point1;
+    if(connection->point1.x == connection->point2.x) {
+        if(connection->point1.y > connection->point2.y) {
+            mine.y--;
+            add_mine(&mine);
+        } else {
+            mine.y++;
+            add_mine(&mine);
+        }
+    } else {
+        if(connection->point1.x > connection->point2.x) {
+            mine.x--;
+            add_mine(&mine);
+        } else {
+            mine.x++;
+            add_mine(&mine);
+        }
+    }
+}
+
 struct Path select_path(struct PathList *paths) {
     struct Path best_path = paths->path[0];
     for(int i = 1; i < paths->length; i++) {
