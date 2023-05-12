@@ -60,7 +60,7 @@ int main()
 /*
 int main() {
     reset_lee_maze();
-    uartHandler();
+    initUART();
 
     add_mine(&(struct Point){6,7});
     add_mine(&(struct Point){7,6});

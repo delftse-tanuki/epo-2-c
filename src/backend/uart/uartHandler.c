@@ -28,11 +28,16 @@ enum Facing {
 
 char instructionSet[100];
 
-/* Determine the orientation of the robot based on the last two crossings. */
-void determineFacing(struct Point currentPoint, struct Point nextPoint, int *facing) {
-    if(currentPoint.y == nextPoint.y) {
+/**
+ * Determine the direction of the path between 2 neighbouring points.
+ *
+ * @param startPoint The start point.
+ * @param endPoint The end point.
+ */
+void determineFacing(struct Point startPoint, struct Point endPoint, int *facing) {
+    if(startPoint.y == endPoint.y) {
         /* The robot is driving vertical */
-        if(currentPoint.x < nextPoint.x) {
+        if(startPoint.x < endPoint.x) {
             /* The robot is driving SOUTH */
             *facing = SOUTH;
         } else {
@@ -42,7 +47,7 @@ void determineFacing(struct Point currentPoint, struct Point nextPoint, int *fac
 
     } else {
         /* The car is driving horizontal */
-        if(currentPoint.y < nextPoint.y) {
+        if(startPoint.y < endPoint.y) {
             /* The robot is driving EAST */
             *facing = EAST;
         } else {
@@ -52,6 +57,9 @@ void determineFacing(struct Point currentPoint, struct Point nextPoint, int *fac
     }
 }
 
+/**
+ * Determine the next instruction for the based on the current orientation.
+ */
 void determineNextInstruction() {
     if(facing == nextFacing) {
         nextInstruction = FORWARD;
@@ -94,6 +102,10 @@ void determineNextInstruction() {
     }
 }
 
+/**
+ * Generate and execute the instructions for the robot.
+ * @param path The path to follow.
+ */
 void executePath(struct Path path) {
     char byteBuffer[BUFSIZ+1];
     int i = 0;
@@ -103,7 +115,7 @@ void executePath(struct Path path) {
     for(i; i < path.length; i++) {
 
         if(path.length - i <= 2) {
-            nextInstruction = 4; // Stop instruction
+            nextInstruction = STOP;
             instructionSet[instructionSetIndex++] = nextInstruction;
             printf("%d, ", nextInstruction);
             break;
@@ -144,7 +156,11 @@ void executePath(struct Path path) {
 
 }
 
-void uartHandler() {
+/**
+ * Initialize the UART connection
+ * @param hSerial
+ */
+void initUART() {
     //----------------------------------------------------------
     // Open COMPORT for reading and writing
     //----------------------------------------------------------

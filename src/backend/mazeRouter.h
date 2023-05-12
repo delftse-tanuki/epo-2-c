@@ -12,7 +12,7 @@ void init_maze_router();
 struct Point index_to_crossing(int x, int y);
 struct Point index_to_station(int index);
 void add_mine(struct Point *point);
-struct PathList calculate_route(struct Point *source, struct Point *destination);
+struct Path calculate_route(struct Point source, struct Point destination);
 struct Path select_path(struct PathList *paths);
 
 #endif //SRC_MAZEROUTER_H

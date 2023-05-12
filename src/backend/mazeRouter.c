@@ -38,12 +38,13 @@ struct Point index_to_station(int index) {
     return stations[index - 1];
 }
 
-struct PathList calculate_route(struct Point *source, struct Point *destination) {
+struct Path calculate_route(struct Point source, struct Point destination) {
     reset_lee_maze();
     for(int i = 0; i < mines.length; i++) {
         lee_add_mine(&mines.mines[i]);
     }
-    return lee(*source, *destination);
+    struct PathList pathList = lee(source, destination);
+    return select_path(&pathList);
 }
 
 void add_mine(struct Point *point) {

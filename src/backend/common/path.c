@@ -5,6 +5,11 @@
 #include <string.h>
 #include "path.h"
 
+/**
+ * Calculates the turns in a path
+ * @param path
+ * @return the number of turns
+ */
 int calc_turns(struct Path *path) {
     int turns = 0;
     for(int i = 0; i < path->length - 2; i++) {
