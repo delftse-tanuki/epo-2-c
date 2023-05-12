@@ -6,5 +6,7 @@
 #define SRC_UARTHANDLER_H
 
 void uartHandler();
+void executePath(struct Path path);
+void closeConnection();
 
 #endif //SRC_UARTHANDLER_H

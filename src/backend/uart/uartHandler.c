@@ -1,77 +1,117 @@
 //
 // Created by Bart Jansen on 08/05/2023.
 //
+#include <stdint.h>
 #include "uart.h"
 #include "../common/path.h"
 #include "../common/point.h"
 
+HANDLE hSerial;
 
 int facing;
 int nextFacing;
-int nextInstruction;
+char nextInstruction;
 
+enum Instruction {
+    FORWARD = 0,
+    LEFT = 1,
+    RIGHT = 2,
+    STOP = 4
+};
+
+enum Facing {
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3
+};
+
+char instructionSet[100];
 
 /* Determine the orientation of the robot based on the last two crossings. */
 void determineFacing(struct Point currentPoint, struct Point nextPoint, int *facing) {
     if(currentPoint.y == nextPoint.y) {
         /* The robot is driving vertical */
-
         if(currentPoint.x < nextPoint.x) {
             /* The robot is driving SOUTH */
-            *facing = 2;
+            *facing = SOUTH;
         } else {
             /* The robot is driving NORTH */
-            *facing = 0;
+            *facing = NORTH;
         }
 
     } else {
         /* The car is driving horizontal */
-
         if(currentPoint.y < nextPoint.y) {
             /* The robot is driving EAST */
-            *facing = 1;
+            *facing = EAST;
         } else {
             /* The robot is driving WEST */
-            *facing = 3;
+            *facing = WEST;
         }
     }
 }
 
 void determineNextInstruction() {
-    if(facing == 3) {
+    if(facing == nextFacing) {
+        nextInstruction = FORWARD;
+    } else if(facing == NORTH) {
         switch(nextFacing) {
-            case 0:
-                nextInstruction = 2;
-            case 2:
-                nextInstruction = 1;
-            case 3:
-                nextInstruction = 0;
+            case EAST:
+                nextInstruction = RIGHT;
+                break;
+            case WEST:
+                nextInstruction = LEFT;
+                break;
         }
-    } else if (nextFacing == facing) {
-        nextInstruction = 0;
-    } else if (nextFacing > facing) {
-        nextInstruction = 2;
-    } else {
-        nextInstruction = 1;
+    } else if (facing == EAST) {
+        switch(nextFacing) {
+            case NORTH:
+                nextInstruction = LEFT;
+                break;
+            case SOUTH:
+                nextInstruction = RIGHT;
+                break;
+        }
+    } else if (facing == SOUTH) {
+        switch(nextFacing) {
+            case WEST:
+                nextInstruction = RIGHT;
+                break;
+            case EAST:
+                nextInstruction = LEFT;
+                break;
+        }
+    } else if(facing == WEST) {
+        switch(nextFacing) {
+            case NORTH:
+                nextInstruction = RIGHT;
+                break;
+            case SOUTH:
+                nextInstruction = LEFT;
+                break;
+        }
     }
 }
 
-void executePath(/*HANDLE hSerial, */struct Path path) {
+void executePath(struct Path path) {
+    char byteBuffer[BUFSIZ+1];
     int i = 0;
+    int instructionSetIndex = 0;
     determineFacing(path.points[i], path.points[i + 1], &facing);
 
     for(i; i < path.length; i++) {
 
         if(path.length - i <= 2) {
             nextInstruction = 4; // Stop instruction
-            //writeByte(hSerial, 00) /* If there are two points left, the instruction is always go forward */
+            instructionSet[instructionSetIndex++] = nextInstruction;
             printf("%d, ", nextInstruction);
             break;
         }
 
         determineFacing(path.points[i + 1], path.points[i + 2], &nextFacing); // Will cause error because i+2 might not exist
         determineNextInstruction();
-        //writeByte(hSerial, nextInstruction);
+        instructionSet[instructionSetIndex++] = nextInstruction;
 
         /* Here we should wait for either confirmation or a mine */
 
@@ -85,18 +125,56 @@ void executePath(/*HANDLE hSerial, */struct Path path) {
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
 
+    char buffRead[BUFSIZ+1];
+    int lastInstruction = instructionSetIndex;
+    instructionSetIndex = 0;
+
+    while (1) {
+        readByte(hSerial, buffRead);
+        if(buffRead[0] == 32) {
+            printf("Received confirmation\n");
+            byteBuffer[0] = instructionSet[instructionSetIndex++];
+            writeByte(hSerial, byteBuffer);
+        }
+        if(instructionSetIndex == lastInstruction) {
+            break;
+        }
+        buffRead[0] = 0;
+    }
+
 }
 
 void uartHandler() {
-    struct Path path;
-    path.points[0] = (struct Point){6,0};
-    path.points[1] = (struct Point){6,2};
-    path.points[2] = (struct Point){4,2};
-    path.points[3] = (struct Point){4,4};
-    path.length = 4;
-    path.turns = 2;
+    //----------------------------------------------------------
+    // Open COMPORT for reading and writing
+    //----------------------------------------------------------
+    hSerial = CreateFile(COMPORT,
+                         GENERIC_READ | GENERIC_WRITE,
+                         0,
+                         0,
+                         OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL,
+                         0
+    );
 
-    executePath(path);
+    if(hSerial == INVALID_HANDLE_VALUE){
+        if(GetLastError()== ERROR_FILE_NOT_FOUND){
+            //serial port does not exist. Inform user.
+            printf(" serial port does not exist \n");
+        }
+        //some other error occurred. Inform user.
+        printf(" some other error occured. Inform user.\n");
+    }
+
+    //----------------------------------------------------------
+    // Initialize the parameters of the COM port
+    //----------------------------------------------------------
+
+    initSio(hSerial);
+}
+
+void closeConnection() {
+    CloseHandle(hSerial);
 }
 
 

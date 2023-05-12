@@ -1,8 +1,5 @@
 #include "uart.h"
 
-#define COMPORT "COM5"
-#define BAUDRATE CBR_9600
-
 //--------------------------------------------------------------
 // Function: initSio
 // Description: intializes the parameters as Baudrate, Bytesize, 
@@ -57,7 +54,7 @@ int readByte(HANDLE hSerial, char *buffRead) {
     {
         printf("error reading byte from input buffer \n");
     }
-    printf("Byte read from read buffer is: %c \n", buffRead[0]);
+    printf("received: %c\n", buffRead[0]);
     return(0);
 }
 
@@ -74,7 +71,6 @@ int writeByte(HANDLE hSerial, char *buffWrite){
     {
         printf("error writing byte to output buffer \n");
     }
-    printf("Byte written to write buffer is: %c \n", buffWrite[0]);
 
     return(0);
 }

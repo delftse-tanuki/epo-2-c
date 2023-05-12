@@ -10,7 +10,7 @@
 #define MAX_PATH_AMOUNT 100
 
 struct Path {
-    struct Point points[20];
+    struct Point points[100];
     int length;
     int turns;
 };

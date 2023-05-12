@@ -18,9 +18,9 @@ const struct Point crossings[5][5] = {
 };
 
 const struct Point stations[12] = {
-        {10, 4}, {10, 6}, {10, 8},
+        {12, 4}, {12, 6}, {12, 8},
         {8, 12}, {6, 12}, {4, 12},
-        {2, 8}, {2, 6}, {2, 4},
+        {0, 8}, {0, 6}, {0, 4},
         {4, 0}, {6, 0}, {8, 0}
 };
 
@@ -35,7 +35,7 @@ struct Point index_to_crossing(int x, int y) {
 }
 
 struct Point index_to_station(int index) {
-    return stations[index];
+    return stations[index - 1];
 }
 
 struct PathList calculate_route(struct Point *source, struct Point *destination) {
@@ -79,5 +79,19 @@ struct Path select_path(struct PathList *paths) {
             best_path = paths->path[i];
         }
     }
-    return best_path;
+
+    struct Path without_edges;
+    without_edges.turns = 0;
+    without_edges.length = 0;
+    int index = 0;
+
+    //remove edges
+    for(int i = 0; i < best_path.length; i++) {
+        if(best_path.points[i].x % 2 == 0 && best_path.points[i].y % 2 == 0) {
+            without_edges.points[without_edges.length++] = best_path.points[i];
+        }
+    }
+    without_edges.turns = calc_turns(&best_path);
+
+    return without_edges;
 }

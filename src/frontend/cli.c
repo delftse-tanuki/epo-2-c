@@ -27,6 +27,7 @@ void challenge_a() {
     for(int i = 0; i < best_path.length; i++) {
         printf("(%d, %d), ", best_path.points[i].x, best_path.points[i].y);
     }
+    executePath(best_path);
     printf("\n\n");
 }
 

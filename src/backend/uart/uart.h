@@ -9,6 +9,9 @@
 #include <Windows.h>
 #include <string.h>
 
+#define COMPORT "COM4"
+#define BAUDRATE CBR_9600
+
 void initSio(HANDLE hSerial);
 int readByte(HANDLE hSerial, char *buffRead);
 int writeByte(HANDLE hSerial, char *buffWrite);
