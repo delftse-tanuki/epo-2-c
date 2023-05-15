@@ -21,5 +21,6 @@ struct PathList {
 };
 
 int calc_turns(struct Path *path);
+int get_point_connections_from_path(struct Path path, struct PointConnection* connections);
 
 #endif //SRC_PATH_H
