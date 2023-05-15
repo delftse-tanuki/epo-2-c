@@ -10,7 +10,7 @@
 #define MAX_PATH_AMOUNT 100
 
 struct Path {
-    struct Point points[20];
+    struct Point points[100];
     int length;
     int turns;
 };
@@ -21,7 +21,5 @@ struct PathList {
 };
 
 int calc_turns(struct Path *path);
-struct Path select_path(struct PathList *paths);
-void print_path(struct Path *path);
 
 #endif //SRC_PATH_H

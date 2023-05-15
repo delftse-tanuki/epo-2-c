@@ -1,20 +1,79 @@
 #include <stdio.h>
 
-#include "backend/lee.h"
+#include "backend/algorithms/lee.h"
+#include "frontend/cli.h"
+#include "backend/mazeRouter.h"
+#include "backend/uart/uartHandler.h"
+#include "backend/uart/uart.h"
+/*
+int main()
+{
+    HANDLE hSerial;
+
+
+    char byteBuffer[BUFSIZ+1];
+    char readBuffer[BUFSIZ+1];
+
+    //----------------------------------------------------------
+    // Open COMPORT for reading and writing
+    //----------------------------------------------------------
+    hSerial = CreateFile(COMPORT,
+                         GENERIC_READ | GENERIC_WRITE,
+                         0,
+                         0,
+                         OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL,
+                         0
+    );
+
+    if(hSerial == INVALID_HANDLE_VALUE){
+        if(GetLastError()== ERROR_FILE_NOT_FOUND){
+            //serial port does not exist. Inform user.
+            printf(" serial port does not exist \n");
+        }
+        //some other error occurred. Inform user.
+        printf(" some other error occured. Inform user.\n");
+    }
+
+    //----------------------------------------------------------
+    // Initialize the parameters of the COM port
+    //----------------------------------------------------------
+
+    initSio(hSerial);
+
+    while ( 1 ) {
+        gets(byteBuffer);
+
+        if (byteBuffer[0] == 'q') // end the loop by typing 'q'
+            break;
+
+        writeByte(hSerial, byteBuffer);
+        readByte(hSerial, readBuffer);
+    }
+
+    printf("ZIGBEE IO DONE!\n");
+    return 0;
+
+    CloseHandle(hSerial);
+}*/
+
 
 int main() {
     reset_lee_maze();
-    //lee_add_mine(&(struct Point){.x = 5, .y = 2});
-    //lee_add_mine(&(struct Point){.x = 5, .y = 10});
-    //lee_add_mine(&(struct Point){.x = 10, .y = 5});
-    struct PathList pathList = lee(10, 10, 2, 2);
+    initUART();
 
-    printf("PathList found: %d\n", pathList.length);
-    struct Path selectedPath = select_path(&pathList);
-    printf("Selected pathList (%d Turns): ", selectedPath.turns);
-    for(int i = 0; i < selectedPath.length; i++) {
-        printf("(%d, %d), ", selectedPath.points[i].x, selectedPath.points[i].y);
-    }
-    printf("\n\n");
+    add_mine(&(struct Point){6,7});
+    add_mine(&(struct Point){7,6});
+    add_mine(&(struct Point){8,5});
+    add_mine(&(struct Point){9,4});
+    add_mine(&(struct Point){10,3});
+
+    struct Point sourceStation = {8, 6};
+    struct Point destinationStation = {8, 4};
+    struct Path path = calculate_route(sourceStation, destinationStation);
+    executePath(path);
+
+    init_CLI();
+    closeConnection();
     return 0;
 }

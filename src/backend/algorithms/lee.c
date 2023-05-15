@@ -10,6 +10,7 @@
 
 #define MAZE_SIZE 13
 
+// A maze template with -1 for walls and 0 for open spaces
 const int maze_template[MAZE_SIZE][MAZE_SIZE] = {
         {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
         {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1},
@@ -26,19 +27,26 @@ const int maze_template[MAZE_SIZE][MAZE_SIZE] = {
         {-1, -1, -1, -1, 0, -1, 0, -1, 0, -1, -1, -1, -1}
 };
 
+// The maze that is used for the algorithm
 int lee_maze[MAZE_SIZE][MAZE_SIZE];
 
 // Directions: 0 = North, 1 = East, 2 = South, 3 = West
 int directions_x[4] = {0, 1, 0, -1};
 int directions_y[4] = {1, 0, -1, 0};
 
-struct Node { // the structure for the search tree of all possible paths
+// the structure for the search tree of all possible paths (See diagram in documentation)
+struct Node {
     struct Point point;
     int distance;
     int options;
     struct Node *next[4];
 };
 
+/**
+ * Initializes the tree containing all possible paths
+ *
+ * @param current The source point (current position in the tree)
+ */
 void trace_nodes(struct Node *current) {
     if(current->distance <= 1) {
         return;
@@ -64,6 +72,13 @@ void trace_nodes(struct Node *current) {
     }
 }
 
+/**
+ * Goes through the tree and creates all possible shortest path structs
+ *
+ * @param current The source point (current position in the tree)
+ * @param path The current path
+ * @param pathList The list of all possible paths
+ */
 void initialize_paths(struct Node *current, struct Path path, struct PathList *pathList) {
     if(current == NULL || pathList->length == MAX_PATH_AMOUNT) {
         return;
@@ -82,6 +97,12 @@ void initialize_paths(struct Node *current, struct Path path, struct PathList *p
     }
 }
 
+/**
+ * Uses Lee's algorithm to fill the maze with the distance from the target to all other points
+ *
+ * @param source The source point
+ * @param target The target point
+ */
 void populate_map(struct Point source, struct Point target) {
     bool visited[MAZE_SIZE][MAZE_SIZE];
     for(int i = 0; i < MAZE_SIZE; i++) {
@@ -112,26 +133,33 @@ void populate_map(struct Point source, struct Point target) {
     }
 }
 
-struct PathList calculate_paths(struct Point source) {
-    struct PathList paths = {0};
+/**
+ * @brief Finds all shortest paths from source to target using Lee's algorithm
+ *
+ * @param source The starting point
+ * @param target The target point
+ * @return A list of all possible shortest paths
+ */
+struct PathList lee(struct Point source, struct Point target) {
+    struct PathList pathList = {0};
     struct Path path = {0};
+
+    populate_map(source, target);
+
     struct Node current = {source, lee_maze[source.x][source.y]};
+
     trace_nodes(&current);
-    initialize_paths(&current, path, &paths);
-    return paths;
+    initialize_paths(&current, path, &pathList);
+
+    return pathList;
 }
 
-struct PathList lee(int sourceX, int sourceY, int destinationX, int destinationY) {
-    struct Point source = {sourceX, sourceY};
-    struct Point dest = {destinationX, destinationY};
-    populate_map(source, dest);
-    return calculate_paths(source);
-}
-
+// Resets the maze to the template
 void reset_lee_maze() {
     memcpy(lee_maze, maze_template, sizeof(maze_template));
 }
 
+// Adds a mine to the maze
 void lee_add_mine(struct Point *point) {
     lee_maze[point->x][point->y] = -1;
 }

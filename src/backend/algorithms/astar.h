@@ -5,8 +5,8 @@
 #ifndef SRC_ASTAR_H
 #define SRC_ASTAR_H
 
-#include "common/point.h"
-#include "common/path.h"
+#include "../common/point.h"
+#include "../common/path.h"
 
 extern const int ASTAR_GRID_SIZE;
 
