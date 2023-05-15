@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "uart.h"
 #include "../common/path.h"
-#include "../common/point.h"
+#include "UARTInstructions.h"
 
 HANDLE hSerial;
 
@@ -12,21 +12,7 @@ int facing;
 int nextFacing;
 char nextInstruction;
 
-enum Instruction {
-    FORWARD = 0,
-    LEFT = 1,
-    RIGHT = 2,
-    STOP = 4
-};
-
-enum Facing {
-    NORTH = 0,
-    EAST = 1,
-    SOUTH = 2,
-    WEST = 3
-};
-
-char instructionSet[100];
+struct UARTInstruction instructionSet[100];
 
 /**
  * Determine the direction of the path between 2 neighbouring points.
@@ -102,6 +88,25 @@ void determineNextInstruction() {
     }
 }
 
+void executeInstructions(struct UARTInstruction instructions[], int length) {
+    char byteBuffer[BUFSIZ+1];
+    char buffRead[BUFSIZ+1];
+    int instructionSetIndex = 0;
+    int lastInstruction = length;
+    while (1) {
+        readByte(hSerial, buffRead);
+        if(buffRead[0] == 32) {
+            printf("Received confirmation\n");
+            byteBuffer[0] = instructions[instructionSetIndex++].instruction;
+            writeByte(hSerial, byteBuffer);
+        }
+        if(instructionSetIndex == lastInstruction) {
+            break;
+        }
+        buffRead[0] = 0;
+    }
+}
+
 /**
  * Generate and execute the instructions for the robot.
  * @param path The path to follow.
@@ -116,14 +121,18 @@ void executePath(struct Path path) {
 
         if(path.length - i <= 2) {
             nextInstruction = STOP;
-            instructionSet[instructionSetIndex++] = nextInstruction;
+            instructionSet[instructionSetIndex++].instruction = nextInstruction;
+            instructionSet[instructionSetIndex].point = path.points[i + 1];
+            instructionSet[instructionSetIndex].facing = facing;
             printf("%d, ", nextInstruction);
             break;
         }
 
         determineFacing(path.points[i + 1], path.points[i + 2], &nextFacing); // Will cause error because i+2 might not exist
         determineNextInstruction();
-        instructionSet[instructionSetIndex++] = nextInstruction;
+        instructionSet[instructionSetIndex++].instruction = nextInstruction;
+        instructionSet[instructionSetIndex].point = path.points[i + 1];
+        instructionSet[instructionSetIndex].facing = facing;
 
         /* Here we should wait for either confirmation or a mine */
 
@@ -136,24 +145,7 @@ void executePath(struct Path path) {
         /* - Request a new route from the last crossing, which is still stored in "nextInstruction" */
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
-
-    char buffRead[BUFSIZ+1];
-    int lastInstruction = instructionSetIndex;
-    instructionSetIndex = 0;
-
-    while (1) {
-        readByte(hSerial, buffRead);
-        if(buffRead[0] == 32) {
-            printf("Received confirmation\n");
-            byteBuffer[0] = instructionSet[instructionSetIndex++];
-            writeByte(hSerial, byteBuffer);
-        }
-        if(instructionSetIndex == lastInstruction) {
-            break;
-        }
-        buffRead[0] = 0;
-    }
-
+    executeInstructions(&instructionSet, instructionSetIndex);
 }
 
 /**

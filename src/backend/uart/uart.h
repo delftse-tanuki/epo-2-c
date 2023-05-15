@@ -9,7 +9,7 @@
 #include <Windows.h>
 #include <string.h>
 
-#define COMPORT "COM4"
+#define COMPORT "COM3"
 #define BAUDRATE CBR_9600
 
 void initSio(HANDLE hSerial);

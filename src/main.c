@@ -5,7 +5,7 @@
 #include "backend/mazeRouter.h"
 #include "backend/uart/uartHandler.h"
 #include "backend/uart/uart.h"
-
+/*
 int main()
 {
     HANDLE hSerial;
@@ -55,9 +55,9 @@ int main()
     return 0;
 
     CloseHandle(hSerial);
-}
+}*/
 
-/*
+
 int main() {
     reset_lee_maze();
     initUART();
@@ -70,11 +70,10 @@ int main() {
 
     struct Point sourceStation = {8, 6};
     struct Point destinationStation = {8, 4};
-    struct PathList pathList = calculate_route(&sourceStation, &destinationStation);
-    struct Path best_path = select_path(&pathList);
-    executePath(best_path);
+    struct Path path = calculate_route(sourceStation, destinationStation);
+    executePath(path);
 
     init_CLI();
     closeConnection();
     return 0;
-}*/
+}

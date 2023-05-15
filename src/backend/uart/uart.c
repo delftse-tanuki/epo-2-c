@@ -54,7 +54,6 @@ int readByte(HANDLE hSerial, char *buffRead) {
     {
         printf("error reading byte from input buffer \n");
     }
-    printf("received: %c\n", buffRead[0]);
     return(0);
 }
 
@@ -71,7 +70,7 @@ int writeByte(HANDLE hSerial, char *buffWrite){
     {
         printf("error writing byte to output buffer \n");
     }
-
+    printf("Send: %d\n", buffWrite[0]);
     return(0);
 }
 
