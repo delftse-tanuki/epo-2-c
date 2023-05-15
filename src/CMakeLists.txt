@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
-project(src C)
+project(epo2 C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(src main.c backend/algorithms/lee.c backend/algorithms/lee.h backend/common/point.h backend/common/point.c backend/common/path.h backend/common/path.c backend/algorithms/astar.c backend/algorithms/astar.h backend/uart/uart.h frontend/cli.c frontend/cli.h backend/mazeRouter.c backend/mazeRouter.h backend/uart/uartHandler.c backend/uart/uartHandler.h backend/uart/uart.c backend/uart/UARTInstructions.h)
+add_subdirectory(thirdparty)
+add_subdirectory(backend)
+add_subdirectory(cli)
+add_subdirectory(gui)

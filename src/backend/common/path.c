@@ -29,3 +29,13 @@ int calc_turns(struct Path *path) {
     }
     return turns;
 }
+
+int get_point_connections_from_path(struct Path path, struct PointConnection* connections) {
+    for (int i = 0; i < path.length - 1; i++) {
+        struct PointConnection connection;
+        connection.point1 = path.points[i];
+        connection.point2 = path.points[i + 1];
+        connections[i] = connection;
+    }
+    return path.length - 1;
+}

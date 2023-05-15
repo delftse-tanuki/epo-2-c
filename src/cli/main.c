@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-#include "backend/algorithms/lee.h"
-#include "frontend/cli.h"
-#include "backend/mazeRouter.h"
-#include "backend/uart/uartHandler.h"
-#include "backend/uart/uart.h"
+#include "../backend/algorithms/lee.h"
+#include "cli.h"
+#include "../backend/mazeRouter.h"
+#include "../backend/uart/uartHandler.h"
+#include "../backend/uart/uart.h"
 /*
 int main()
 {
