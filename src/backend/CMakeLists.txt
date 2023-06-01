@@ -9,7 +9,7 @@ add_library(backend OBJECT
         common/point.h
         mazeRouter.c
         mazeRouter.h
-        )
+        robot_state.h)
 
 if (WIN32)
 target_sources(backend PRIVATE
