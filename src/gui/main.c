@@ -15,6 +15,7 @@
 #define NK_IMPLEMENTATION
 #define NK_GLFW_GL2_IMPLEMENTATION
 #define NK_KEYSTATE_BASED_INPUT
+#define NK_INCLUDE_FIXED_TYPES
 
 #include "../thirdparty/nuklear.h"
 #include "../thirdparty/nuklear_glfw_gl2.h"

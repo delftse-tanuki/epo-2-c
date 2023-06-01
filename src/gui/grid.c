@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define NK_INCLUDE_FIXED_TYPES
+
 #include "../thirdparty/nuklear.h"
 #include "gui_helpers.h"
 
