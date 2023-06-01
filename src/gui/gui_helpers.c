@@ -4,6 +4,7 @@
 
 #include "gui_helpers.h"
 
+#define NK_INCLUDE_FIXED_TYPES
 #include "../thirdparty/nuklear.h"
 
 void vertical_spacer(struct nk_context* context, float spacing) {

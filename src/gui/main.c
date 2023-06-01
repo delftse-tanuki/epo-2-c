@@ -22,7 +22,7 @@
 
 #include "grid.h"
 #include "gui_helpers.h"
-#include "../backend/algorithms/astar.h"
+#include "../backend/mazeRouter.h"
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -81,6 +81,9 @@ int main(void) {
     }
 
     bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+
+    // Initialize maze code
+    init_maze_router();
 
     while (!glfwWindowShouldClose(win)) {
         // Input
@@ -185,6 +188,9 @@ int main(void) {
                     struct PointConnection connection;
                     connection.point1 = mine_point1;
                     connection.point2 = mine_point2;
+                    struct PointConnection lee_connection;
+                    lee_connection.point1 = index_to_crossing(mine_point1.x, mine_point1.y);
+                    lee_connection.point2 = index_to_crossing(mine_point2.x, mine_point2.y);
 
                     bool already_exists = false;
                     for (int i = 0; i < mine_count; i++) {
@@ -194,11 +200,16 @@ int main(void) {
                     }
 
                     if (already_exists) {
+                        init_maze_router();
                         struct PointConnection new_mines[50];
                         int new_count = 0;
                         for (int i = 0; i < mine_count; i++) {
                             if (!is_point_connection_equal(connection, test_mines[i])) {
                                 new_mines[new_count++] = test_mines[i];
+                                struct PointConnection new_lee_connection;
+                                new_lee_connection.point1 = index_to_crossing(test_mines[i].point1.x, test_mines[i].point1.y);
+                                new_lee_connection.point2 = index_to_crossing(test_mines[i].point2.x, test_mines[i].point2.y);
+                                add_point_connection_mine(&new_lee_connection);
                             }
                         }
 
@@ -211,9 +222,11 @@ int main(void) {
                     else {
                         test_mines[mine_count] = connection;
                         mine_count++;
+                        add_point_connection_mine(&lee_connection);
                     }
                 }
-                current_path = get_path(start_point, end_point, test_mines, mine_count);
+
+                current_path = lee_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
             }
             else if (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
                 if (last_selected_robot_point == 0) {
@@ -233,7 +246,7 @@ int main(void) {
                     last_selected_point = 0;
                 }
 
-                current_path = get_path(start_point, end_point, test_mines, mine_count);
+                current_path = lee_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
             }
         }
 

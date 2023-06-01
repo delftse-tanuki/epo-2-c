@@ -39,3 +39,27 @@ int get_point_connections_from_path(struct Path path, struct PointConnection* co
     }
     return path.length - 1;
 }
+
+struct Path lee_to_index(struct Path path) {
+    struct Path result;
+    int count = 0;
+
+    for (int i = 0; i < path.length; i++) {
+        struct Point point;
+        point = crossing_to_index(path.points[i]);
+        if (point_is_valid(&point)) {
+            result.points[count++] = point;
+            continue;
+        }
+
+        int station = station_to_index(path.points[i]);
+        if (station != -1) {
+            point.x = -1;
+            point.y = station;
+            result.points[count++] = point;
+        }
+    }
+
+    result.length = count;
+    return result;
+}
