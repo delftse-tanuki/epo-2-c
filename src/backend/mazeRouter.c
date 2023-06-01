@@ -9,33 +9,10 @@ struct Mines {
     int length;
 };
 
-const struct Point crossings[5][5] = {
-        {{2,2}, {4, 2}, {6, 2}, {8, 2}, {10, 2}},
-        {{2,4}, {4, 4}, {6, 4}, {8, 4}, {10, 4}},
-        {{2,6}, {4, 6}, {6, 6}, {8, 6}, {10, 6}},
-        {{2,8}, {4, 8}, {6, 8}, {8, 8}, {10, 8}},
-        {{2,10}, {4, 10}, {6, 10}, {8, 10}, {10, 10}}
-};
-
-const struct Point stations[12] = {
-        {12, 4}, {12, 6}, {12, 8},
-        {8, 12}, {6, 12}, {4, 12},
-        {0, 8}, {0, 6}, {0, 4},
-        {4, 0}, {6, 0}, {8, 0}
-};
-
 struct Mines mines;
 
 void init_maze_router() {
     mines.length = 0;
-}
-
-struct Point index_to_crossing(int x, int y) {
-    return crossings[x][y];
-}
-
-struct Point index_to_station(int index) {
-    return stations[index - 1];
 }
 
 struct Path calculate_route(struct Point source, struct Point destination) {
@@ -52,7 +29,7 @@ void add_mine(struct Point *point) {
     lee_add_mine(point);
 }
 
-void point_connection_mine(struct PointConnection *connection) {
+void add_point_connection_mine(struct PointConnection *connection) {
     struct Point mine = connection->point1;
     if(connection->point1.x == connection->point2.x) {
         if(connection->point1.y > connection->point2.y) {

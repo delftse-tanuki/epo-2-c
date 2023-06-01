@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define NK_INCLUDE_FIXED_TYPES
+
 #include "../thirdparty/nuklear.h"
 #include "gui_helpers.h"
 
@@ -102,8 +104,29 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
     for (int i = 0; i < 13; i++) {
         if (i == 4 || i == 6 || i == 8) {
             char label[3];
-            strcpy(label, i == 4 ? "S6" : (i == 6 ? "S8" : "S7"));
-            nk_button_label(ctx, label);
+            int station_index = -1;
+            switch (i) {
+                case 4:
+                    strcpy(label, "S9");
+                    station_index = 9;
+                    break;
+                case 6:
+                    strcpy(label, "S8");
+                    station_index = 8;
+                    break;
+                case 8:
+                    strcpy(label, "S7");
+                    station_index = 7;
+                    break;
+                default:
+                    break;
+            }
+
+            if (nk_button_label(ctx, label)) {
+                selection.x = -1;
+                selection.y = station_index;
+                *selected = true;
+            }
         } else {
             draw_empty_space(ctx);
         }
@@ -112,7 +135,37 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
     // Top Station Lines
     for (int i = 0; i < 13; i++) {
         if (i == 4 || i == 6 || i == 8) {
-            draw_grid_edge(ctx, VERTICAL, NORMAL);
+            int station_index = -1;
+            switch (i) {
+                case 4:
+                    station_index = 9;
+                    break;
+                case 6:
+                    station_index = 8;
+                    break;
+                case 8:
+                    station_index = 7;
+                    break;
+                default:
+                    break;
+            }
+
+            struct Point point;
+            point.x = -1;
+            point.y = station_index;
+
+            enum LineState line_state = NORMAL;
+            if (is_point_in_connection(point, robot_position)) {
+                line_state = CURRENT;
+            }
+            else if (is_point_in_connection_array(point, mines, mine_count)) {
+                line_state = BLOCKED;
+            }
+            else if (is_point_in_connection_array(point, connections, connection_count)) {
+                line_state = HIGHLIGHTED;
+            }
+
+            draw_grid_edge(ctx, VERTICAL, line_state);
         } else {
             draw_empty_space(ctx);
         }
@@ -121,14 +174,65 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
     for (int i = 0; i < 9; i++) {
         if (i == 2 || i == 4 || i == 6) {
             char label[4];
-            strcpy(label, i == 2 ? "S10" : (i == 4 ? "S11" : "S12"));
-            nk_button_label(ctx, label);
+            int station_index = -1;
+            switch (i) {
+                case 2:
+                    strcpy(label, "S10");
+                    station_index = 10;
+                    break;
+                case 4:
+                    strcpy(label, "S11");
+                    station_index = 11;
+                    break;
+                case 6:
+                    strcpy(label, "S12");
+                    station_index = 12;
+                    break;
+                default:
+                    break;
+            }
+
+            if (nk_button_label(ctx, label)) {
+                selection.x = -1;
+                selection.y = station_index;
+                *selected = true;
+            }
         } else {
             draw_empty_space(ctx);
         }
 
         if (i == 2 || i == 4 || i == 6) {
-            draw_grid_edge(ctx, HORIZONTAL, NORMAL);
+            int station_index = -1;
+            switch (i) {
+                case 2:
+                    station_index = 10;
+                    break;
+                case 4:
+                    station_index = 11;
+                    break;
+                case 6:
+                    station_index = 12;
+                    break;
+                default:
+                    break;
+            }
+
+            struct Point point;
+            point.x = -1;
+            point.y = station_index;
+
+            enum LineState line_state = NORMAL;
+            if (is_point_in_connection(point, robot_position)) {
+                line_state = CURRENT;
+            }
+            else if (is_point_in_connection_array(point, mines, mine_count)) {
+                line_state = BLOCKED;
+            }
+            else if (is_point_in_connection_array(point, connections, connection_count)) {
+                line_state = HIGHLIGHTED;
+            }
+
+            draw_grid_edge(ctx, HORIZONTAL, line_state);
         } else {
             draw_empty_space(ctx);
         }
@@ -178,35 +282,138 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
         }
 
         if (i == 2 || i == 4 || i == 6) {
-            draw_grid_edge(ctx, HORIZONTAL, NORMAL);
+            int station_index = -1;
+            switch (i) {
+                case 2:
+                    station_index = 6;
+                    break;
+                case 4:
+                    station_index = 5;
+                    break;
+                case 6:
+                    station_index = 4;
+                    break;
+                default:
+                    break;
+            }
+
+            struct Point point;
+            point.x = -1;
+            point.y = station_index;
+
+            enum LineState line_state = NORMAL;
+            if (is_point_in_connection(point, robot_position)) {
+                line_state = CURRENT;
+            }
+            else if (is_point_in_connection_array(point, mines, mine_count)) {
+                line_state = BLOCKED;
+            }
+            else if (is_point_in_connection_array(point, connections, connection_count)) {
+                line_state = HIGHLIGHTED;
+            }
+
+            draw_grid_edge(ctx, HORIZONTAL, line_state);
         } else {
             draw_empty_space(ctx);
         }
 
         if (i == 2 || i == 4 || i == 6) {
             char label[3];
-            strcpy(label, i == 2 ? "S6" : (i == 4 ? "S5" : "S4"));
-            nk_button_label(ctx, label);
+            int station_index = -1;
+            switch (i) {
+                case 2:
+                    strcpy(label, "S6");
+                    station_index = 6;
+                    break;
+                case 4:
+                    strcpy(label, "S5");
+                    station_index = 5;
+                    break;
+                case 6:
+                    strcpy(label, "S4");
+                    station_index = 4;
+                    break;
+                default:
+                    break;
+            }
+
+            if (nk_button_label(ctx, label)) {
+                selection.x = -1;
+                selection.y = station_index;
+                *selected = true;
+            }
         } else {
             draw_empty_space(ctx);
         }
     }
 
-    // Top Station Lines
+    // Bottom Station Lines
     for (int i = 0; i < 13; i++) {
         if (i == 4 || i == 6 || i == 8) {
-            draw_grid_edge(ctx, VERTICAL, NORMAL);
+            int station_index = -1;
+            switch (i) {
+                case 4:
+                    station_index = 1;
+                    break;
+                case 6:
+                    station_index = 2;
+                    break;
+                case 8:
+                    station_index = 3;
+                    break;
+                default:
+                    break;
+            }
+
+            struct Point point;
+            point.x = -1;
+            point.y = station_index;
+
+            enum LineState line_state = NORMAL;
+            if (is_point_in_connection(point, robot_position)) {
+                line_state = CURRENT;
+            }
+            else if (is_point_in_connection_array(point, mines, mine_count)) {
+                line_state = BLOCKED;
+            }
+            else if (is_point_in_connection_array(point, connections, connection_count)) {
+                line_state = HIGHLIGHTED;
+            }
+
+            draw_grid_edge(ctx, VERTICAL, line_state);
         } else {
             draw_empty_space(ctx);
         }
     }
 
-    // Top Station Buttons
+    // Bottom Station Buttons
     for (int i = 0; i < 13; i++) {
         if (i == 4 || i == 6 || i == 8) {
             char label[3];
-            strcpy(label, i == 4 ? "S1" : (i == 6 ? "S2" : "S3"));
-            nk_button_label(ctx, label);
+
+            int station_index = -1;
+            switch (i) {
+                case 4:
+                    strcpy(label, "S1");
+                    station_index = 1;
+                    break;
+                case 6:
+                    strcpy(label, "S2");
+                    station_index = 2;
+                    break;
+                case 8:
+                    strcpy(label, "S3");
+                    station_index = 3;
+                    break;
+                default:
+                    break;
+            }
+
+            if (nk_button_label(ctx, label)) {
+                selection.x = -1;
+                selection.y = station_index;
+                *selected = true;
+            }
         } else {
             draw_empty_space(ctx);
         }
