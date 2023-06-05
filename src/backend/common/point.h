@@ -30,5 +30,7 @@ struct Point index_to_station(int index);
 int station_to_index(struct Point point);
 struct Point crossing_to_index(struct Point point);
 struct Point index_to_lee(struct Point point);
+struct Point lee_to_index(struct Point point);
+void get_lee_name(struct Point point, char* result);
 
 #endif //SRC_POINT_H

@@ -22,6 +22,7 @@
 
 #include "grid.h"
 #include "gui_helpers.h"
+#include "../backend/robot_state.h"
 #include "../backend/mazeRouter.h"
 
 #define WINDOW_WIDTH 1200
@@ -46,10 +47,20 @@ struct Point mine_point1;
 struct Point mine_point2;
 struct PointConnection robot_position;
 int last_selected_robot_point = 0;
+struct RobotState robot_state;
 
 static void error_callback(int e, const char *d) { printf("Error %d: %s\n", e, d); }
 
 int main(void) {
+    robot_state.facing = NORTH;
+    robot_state.next_instruction = FORWARD;
+    robot_state.data_received = true;
+    robot_state.current_position.point1.x = 2;
+    robot_state.current_position.point1.y = 3;
+    robot_state.current_position.point2.x = 2;
+    robot_state.current_position.point2.y = 4;
+    robot_state.mines_count = 4;
+
     /* Platform */
     static GLFWwindow *win;
     int width = 0, height = 0;
@@ -103,7 +114,7 @@ int main(void) {
                 nk_layout_row_dynamic(ctx, 30, 1);
                 nk_label(ctx, "Challenge Select", NK_TEXT_ALIGN_CENTERED);
 
-                nk_layout_row_dynamic(ctx, 120, 3);
+                nk_layout_row_dynamic(ctx, 200, 3);
 
                 if (nk_group_begin(ctx, "Challenge Selection", NK_WINDOW_NO_SCROLLBAR)) {
                     nk_layout_row_dynamic(ctx, 105, 2);
@@ -124,26 +135,99 @@ int main(void) {
 
                 if (nk_group_begin(ctx, "Robot Status:", NK_WINDOW_TITLE)) {
                     nk_layout_row_dynamic(ctx, 30, 1);
-                    nk_label_colored(ctx, "No signal.", NK_TEXT_ALIGN_LEFT, nk_red);
-                    nk_label_colored(ctx, "Verdict: NOT READY.", NK_TEXT_ALIGN_LEFT, nk_red);
+                    if (robot_state.data_received) {
+                        nk_label_colored(ctx, "Signal Received", NK_TEXT_ALIGN_LEFT, nk_green);
+                    }
+                    else {
+                        nk_label_colored(ctx, "No Signal", NK_TEXT_ALIGN_LEFT, nk_red);
+                    }
+                    if (!robot_state.major_failure) {
+                        nk_label_colored(ctx, "All Systems OK", NK_TEXT_ALIGN_LEFT, nk_green);
+                    }
+                    else {
+                        nk_label_colored(ctx, "MAJOR FAILURE", NK_TEXT_ALIGN_LEFT, nk_red);
+                    }
                     nk_group_end(ctx);
                 }
             }
             else {
                 vertical_spacer(ctx, 10);
-                nk_layout_row_dynamic(ctx, 120, 2);
+                nk_layout_row_dynamic(ctx, 200, 2);
                 char text[12] = "Challenge A:";
                 strcpy(text, current_challenge == CHALLENGE_B ? "Challenge B:" : (current_challenge == CHALLENGE_C ? "Challenge C:" : text));
                 if (nk_group_begin(ctx, text, NK_WINDOW_TITLE)) {
                     nk_layout_row_dynamic(ctx, 30, 1);
-                    nk_label_colored(ctx, "Going from S1 to S12.", NK_TEXT_ALIGN_LEFT, nk_white);
-                    nk_label_colored(ctx, "No mines detected thus far.", NK_TEXT_ALIGN_LEFT, nk_white);
+                    char path_description[50];
+                    char point1_string[10];
+                    char point2_string[10];
+                    get_lee_name(index_to_lee(current_path.points[0]), point1_string);
+                    get_lee_name(index_to_lee(current_path.points[current_path.length - 1]), point2_string);
+                    sprintf(path_description, "Going from %s to %s.", point1_string, point2_string);
+                    nk_label_colored(ctx, path_description, NK_TEXT_ALIGN_LEFT, nk_white);
+                    if (robot_state.mines_count == 0) {
+                        nk_label_colored(ctx, "No mines detected thus far.", NK_TEXT_ALIGN_LEFT, nk_white);
+                    }
+                    else {
+                        char mine_string[50];
+                        sprintf(mine_string, "%d mines detected", robot_state.mines_count);
+                        nk_label_colored(ctx, mine_string, NK_TEXT_ALIGN_LEFT, nk_white);
+                    }
+                    char* next_instruction_string;
+                    switch (robot_state.next_instruction) {
+                        case FORWARD:
+                            next_instruction_string = "FORWARD";
+                            break;
+                        case LEFT:
+                            next_instruction_string = "LEFT";
+                            break;
+                        case RIGHT:
+                            next_instruction_string = "RIGHT";
+                            break;
+                        case STOP:
+                            next_instruction_string = "STOP";
+                            break;
+                    }
+                    if (robot_state.data_received) {
+                        nk_label_colored(ctx, "Signal Received", NK_TEXT_ALIGN_LEFT, nk_green);
+                    }
+                    else {
+                        nk_label_colored(ctx, "No Signal", NK_TEXT_ALIGN_LEFT, nk_red);
+                    }
+                    nk_layout_row_dynamic(ctx, 30, 2);
+                    nk_label_colored(ctx, "Next Instruction: ", NK_TEXT_ALIGN_LEFT, nk_white);
+                    nk_label_colored(ctx, next_instruction_string, NK_TEXT_ALIGN_LEFT, nk_white);
+
                     nk_group_end(ctx);
                 }
                 if (nk_group_begin(ctx, "Robot Status:", NK_WINDOW_TITLE)) {
                     nk_layout_row_dynamic(ctx, 30, 1);
                     nk_label_colored(ctx, "Challenge in progress...", NK_TEXT_ALIGN_LEFT, nk_green);
                     nk_label_colored(ctx, "Waiting for robot to reach crossing...", NK_TEXT_ALIGN_LEFT, nk_white);
+                    if (!robot_state.major_failure) {
+                        nk_label_colored(ctx, "All Systems OK", NK_TEXT_ALIGN_LEFT, nk_green);
+                    }
+                    else {
+                        nk_label_colored(ctx, "MAJOR FAILURE", NK_TEXT_ALIGN_LEFT, nk_red);
+                    }
+                    char* next_facing_string;
+                    switch (robot_state.facing) {
+                        case EAST:
+                            next_facing_string = "EAST";
+                            break;
+                        case NORTH:
+                            next_facing_string = "NORTH";
+                            break;
+                        case SOUTH:
+                            next_facing_string = "SOUTH";
+                            break;
+                        case WEST:
+                            next_facing_string = "WEST";
+                            break;
+                    }
+                    nk_layout_row_dynamic(ctx, 30, 2);
+                    nk_label_colored(ctx, "Currently Facing: ", NK_TEXT_ALIGN_LEFT, nk_white);
+                    nk_label_colored(ctx, next_facing_string, NK_TEXT_ALIGN_LEFT, nk_white);
+
                     nk_group_end(ctx);
                 }
             }
@@ -226,7 +310,7 @@ int main(void) {
                     }
                 }
 
-                current_path = lee_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
+                current_path = lee_path_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
             }
             else if (glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
                 if (last_selected_robot_point == 0) {
@@ -246,7 +330,7 @@ int main(void) {
                     last_selected_point = 0;
                 }
 
-                current_path = lee_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
+                current_path = lee_path_to_index(calculate_route(index_to_lee(start_point), index_to_lee(end_point)));
             }
         }
 
@@ -262,4 +346,8 @@ int main(void) {
     nk_glfw3_shutdown();
     glfwTerminate();
     return 0;
+}
+
+void update_robot_state(struct RobotState state) {
+    robot_state = state;
 }

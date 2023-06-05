@@ -2,6 +2,7 @@
 // Created by Jens on 5/3/2023.
 //
 #include <stdlib.h>
+#include <stdio.h>
 #include "point.h"
 
 const struct Point crossings[5][5] = {
@@ -113,5 +114,32 @@ struct Point index_to_lee(struct Point point) {
 
     result.x = -1;
     result.y = -1;
+    return result;
+}
+
+void get_lee_name(struct Point point, char* result) {
+    struct Point index = crossing_to_index(point);
+    if (index.x != -1) {
+        sprintf(result, "[%d,%d]", index.x, index.y);
+        return;
+    }
+    index.y = station_to_index(point);
+    if (index.y != -1) {
+        sprintf(result, "S%d", index.y);
+    }
+    else {
+        sprintf(result, "ERR");
+    }
+}
+
+struct Point lee_to_index(struct Point point) {
+    struct Point result;
+    result.y = station_to_index(point);
+    if (result.y != -1) {
+        result.x = -1;
+    }
+    else {
+        result = crossing_to_index(point);
+    }
     return result;
 }
