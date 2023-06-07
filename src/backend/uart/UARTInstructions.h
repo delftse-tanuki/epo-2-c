@@ -27,4 +27,10 @@ struct UARTInstruction {
     enum Facing facing;
 };
 
+enum PathExecutionResult {
+    SUCCESS,
+    FAILURE,
+    MINE
+};
+
 #endif //SRC_UARTINSTRUCTIONS_H

@@ -1,9 +1,11 @@
-add_executable(epo2gui main.c grid.c grid.h gui_helpers.c gui_helpers.h)
+add_executable(epo2gui main.c grid.c grid.h gui_helpers.c gui_helpers.h gui.h gui.c)
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(epo2gui OpenGL::GL)
 target_link_libraries(epo2gui backend)
 target_link_libraries(epo2gui glfw)
+
+target_compile_definitions(backend PUBLIC GUI)
 
 add_custom_command(
         TARGET epo2gui POST_BUILD

@@ -143,3 +143,10 @@ struct Point lee_to_index(struct Point point) {
     }
     return result;
 }
+
+struct Point create_point(int x, int y) {
+    struct Point result;
+    result.x = x;
+    result.y = y;
+    return result;
+}
