@@ -6,14 +6,15 @@
 #define EPO2_ROBOT_STATE_H
 
 #include "uart/UARTInstructions.h"
+#include "common/path.h"
 
 struct RobotState {
     // What way is the robot currently facing?
     enum Facing facing;
     // What's the next instruction we'll be sending to the robot?
     enum Instruction next_instruction;
-    // What's the robot current position? (i.e. between which crossings is it?)
-    struct PointConnection current_position;
+    // What's the robot's last reported position? In index format.
+    struct Point last_reported_position;
     // Did we receive a byte from the robot in the last process loop?
     bool data_received;
     // Did we suffer a major failure that requires a reset?

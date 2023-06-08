@@ -89,9 +89,19 @@ void draw_grid_edge(struct nk_context *ctx, enum LineKind line_kind, enum LineSt
     nk_stroke_line(canvas, x0, y0, x1, y1, 5.0f, color);
 }
 
+bool should_be_highlighted(int x, int y, struct Point point) {
+    return (x == point.x && y == point.y);
+}
+
 struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointConnection *mines, int mine_count,
-                       bool *selected, struct PointConnection robot_position) {
+                       bool *selected, struct Point robot_position) {
     struct Point selection;
+    *selected = false;
+
+    struct nk_style_button normal_style = ctx->style.button;
+    struct nk_style_button highlighted_style = ctx->style.button;
+    highlighted_style.text_normal = nk_rgb(255, 60, 255);
+    highlighted_style.border_color = nk_rgb(255, 60, 255);
 
     nk_layout_row_dynamic(ctx, 30, 1);
     nk_label(ctx, "Live Grid View", NK_TEXT_ALIGN_CENTERED);
@@ -122,7 +132,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
                     break;
             }
 
-            if (nk_button_label(ctx, label)) {
+            if (nk_button_label_styled(ctx, should_be_highlighted(-1, station_index, robot_position) ? &highlighted_style : &normal_style, label)) {
                 selection.x = -1;
                 selection.y = station_index;
                 *selected = true;
@@ -155,10 +165,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             point.y = station_index;
 
             enum LineState line_state = NORMAL;
-            if (is_point_in_connection(point, robot_position)) {
-                line_state = CURRENT;
-            }
-            else if (is_point_in_connection_array(point, mines, mine_count)) {
+            if (is_point_in_connection_array(point, mines, mine_count)) {
                 line_state = BLOCKED;
             }
             else if (is_point_in_connection_array(point, connections, connection_count)) {
@@ -192,7 +199,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
                     break;
             }
 
-            if (nk_button_label(ctx, label)) {
+            if (nk_button_label_styled(ctx, should_be_highlighted(-1, station_index, robot_position) ? &highlighted_style : &normal_style, label)) {
                 selection.x = -1;
                 selection.y = station_index;
                 *selected = true;
@@ -222,10 +229,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             point.y = station_index;
 
             enum LineState line_state = NORMAL;
-            if (is_point_in_connection(point, robot_position)) {
-                line_state = CURRENT;
-            }
-            else if (is_point_in_connection_array(point, mines, mine_count)) {
+            if (is_point_in_connection_array(point, mines, mine_count)) {
                 line_state = BLOCKED;
             }
             else if (is_point_in_connection_array(point, connections, connection_count)) {
@@ -243,10 +247,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             } else if (i % 2) {
                 enum LineState line_state = NORMAL;
                 struct PointConnection line_connection = get_line_path(i, j);
-                if (is_point_connection_equal(line_connection, robot_position)) {
-                    line_state = CURRENT;
-                }
-                else if (is_connection_in_array(line_connection, mines, mine_count)) {
+                if (is_connection_in_array(line_connection, mines, mine_count)) {
                     line_state = BLOCKED;
                 }
                 else if (is_connection_in_array(line_connection, connections, connection_count)) {
@@ -256,10 +257,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             } else if (j % 2) {
                 enum LineState line_state = NORMAL;
                 struct PointConnection line_connection = get_line_path(i, j);
-                if (is_point_connection_equal(line_connection, robot_position)) {
-                    line_state = CURRENT;
-                }
-                else if (is_connection_in_array(line_connection, mines, mine_count)) {
+                if (is_connection_in_array(line_connection, mines, mine_count)) {
                     line_state = BLOCKED;
                 }
                 else if (is_connection_in_array(line_connection, connections, connection_count)) {
@@ -273,7 +271,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
 
                 snprintf(label, 5, "%d, %d", x, y);
 
-                if (nk_button_label(ctx, label)) {
+                if (nk_button_label_styled(ctx, should_be_highlighted(x, y, robot_position) ? &highlighted_style : &normal_style, label)) {
                     selection.x = x;
                     selection.y = y;
                     *selected = true;
@@ -302,10 +300,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             point.y = station_index;
 
             enum LineState line_state = NORMAL;
-            if (is_point_in_connection(point, robot_position)) {
-                line_state = CURRENT;
-            }
-            else if (is_point_in_connection_array(point, mines, mine_count)) {
+            if (is_point_in_connection_array(point, mines, mine_count)) {
                 line_state = BLOCKED;
             }
             else if (is_point_in_connection_array(point, connections, connection_count)) {
@@ -337,7 +332,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
                     break;
             }
 
-            if (nk_button_label(ctx, label)) {
+            if (nk_button_label_styled(ctx, should_be_highlighted(-1, station_index, robot_position) ? &highlighted_style : &normal_style, label)) {
                 selection.x = -1;
                 selection.y = station_index;
                 *selected = true;
@@ -370,10 +365,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             point.y = station_index;
 
             enum LineState line_state = NORMAL;
-            if (is_point_in_connection(point, robot_position)) {
-                line_state = CURRENT;
-            }
-            else if (is_point_in_connection_array(point, mines, mine_count)) {
+            if (is_point_in_connection_array(point, mines, mine_count)) {
                 line_state = BLOCKED;
             }
             else if (is_point_in_connection_array(point, connections, connection_count)) {
@@ -409,7 +401,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
                     break;
             }
 
-            if (nk_button_label(ctx, label)) {
+            if (nk_button_label_styled(ctx, should_be_highlighted(-1, station_index, robot_position) ? &highlighted_style : &normal_style, label)) {
                 selection.x = -1;
                 selection.y = station_index;
                 *selected = true;

@@ -40,7 +40,7 @@ int get_point_connections_from_path(struct Path path, struct PointConnection* co
     return path.length - 1;
 }
 
-struct Path lee_to_index(struct Path path) {
+struct Path lee_path_to_index(struct Path path) {
     struct Path result;
     int count = 0;
 
