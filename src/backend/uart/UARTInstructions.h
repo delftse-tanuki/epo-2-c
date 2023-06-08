@@ -11,7 +11,7 @@ enum Instruction {
     FORWARD = 0,
     LEFT = 1,
     RIGHT = 2,
-    STOP = 4
+    STOP = 3
 };
 
 enum Facing {

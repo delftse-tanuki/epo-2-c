@@ -89,30 +89,14 @@ void determineNextInstruction() {
 }
 
 void executeInstructions(struct UARTInstruction instructions[], int length) {
-    char byteBuffer[BUFSIZ+1];
-    char buffRead[BUFSIZ+1];
-    int instructionSetIndex = 0;
-    int lastInstruction = length;
-    while (1) {
-        readByte(hSerial, buffRead);
-        if(buffRead[0] == 32) {
-            printf("Received confirmation\n");
-            byteBuffer[0] = instructions[instructionSetIndex++].instruction;
-            writeByte(hSerial, byteBuffer);
-        }
-        if(instructionSetIndex == lastInstruction) {
-            break;
-        }
-        buffRead[0] = 0;
-    }
+
 }
 
 /**
  * Generate and execute the instructions for the robot.
  * @param path The path to follow.
  */
-void executePath(struct Path path) {
-    char byteBuffer[BUFSIZ+1];
+void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult)) {
     int i = 0;
     int instructionSetIndex = 0;
     determineFacing(path.points[i], path.points[i + 1], &facing);
@@ -145,7 +129,24 @@ void executePath(struct Path path) {
         /* - Request a new route from the last crossing, which is still stored in "nextInstruction" */
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
-    executeInstructions(&instructionSet, instructionSetIndex);
+    char byteBuffer[BUFSIZ+1];
+    char buffRead[BUFSIZ+1];
+    int index = 0;
+    byteBuffer[0] = STOP;
+    writeByte(hSerial, byteBuffer);
+    while (1) {
+        readByte(hSerial, buffRead);
+        if(buffRead[0] == 32) {
+            printf("Received confirmation\n");
+            byteBuffer[0] = instructionSet[index++].instruction;
+            writeByte(hSerial, byteBuffer);
+        }
+        if(instructionSetIndex == index) {
+            path_ended(SUCCESS);
+            break;
+        }
+        buffRead[0] = 0;
+    }
 }
 
 /**

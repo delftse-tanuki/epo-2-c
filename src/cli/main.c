@@ -60,18 +60,25 @@ int main()
 
 int main() {
     reset_lee_maze();
-    initUART();
+    initConnection();
 
-    add_mine(&(struct Point){6,7});
-    add_mine(&(struct Point){7,6});
-    add_mine(&(struct Point){8,5});
-    add_mine(&(struct Point){9,4});
-    add_mine(&(struct Point){10,3});
-
-    struct Point sourceStation = {8, 6};
-    struct Point destinationStation = {8, 4};
+    struct Point sourceStation = index_to_station(6);
+    struct Point destinationStation = index_to_station(8);
     struct Path path = calculate_route(sourceStation, destinationStation);
-    executePath(path);
+    executePath(path, 0, 1);
+
+    /*
+    for (int i = 1; i <= 12; i++) {
+        for(int j = 12; j >= 1; j--) {
+            struct Path path = calculate_route(index_to_station(i), index_to_station(j));
+            printf("Path from (%d, %d) to (%d, %d) (%d Turns): ", index_to_station(i).x, index_to_station(i).y, index_to_station(j).x, index_to_station(j).y, path.turns);
+            for(int i = 0; i < path.length; i++) {
+                printf("(%d, %d), ", path.points[i].x, path.points[i].y);
+            }
+            printf("\n");
+            reset_lee_maze();
+        }
+    }*/
 
     init_CLI();
     closeConnection();

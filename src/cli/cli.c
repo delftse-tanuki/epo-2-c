@@ -9,6 +9,10 @@
 
 int running = 1;
 
+void path_ended(enum PathExecutionResult) {
+
+}
+
 /**
  * Starts challenge A or B
  */
@@ -36,7 +40,7 @@ void challengeAB() {
         printf("(%d, %d), ", path.points[i].x, path.points[i].y);
     }
 
-    executePath(path);
+    executePath(path, path_ended);
     printf("\n\n");
 }
 
