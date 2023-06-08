@@ -24,6 +24,26 @@ void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult))
         nanosleep(&ts, NULL);
 #endif
         get_robot_state()->last_reported_position = lee_to_index(path.points[i]);
+        if (!get_robot_state()->ignore_mines && is_point_equal(lee_to_index(path.points[i]), create_point(1, 2)) && is_point_equal(lee_to_index(path.points[i + 1]), create_point(1, 1))) {
+            struct PointConnection connection;
+            connection.point1 = create_point(1, 1);
+            connection.point2 = create_point(1, 2);
+            get_robot_state()->mines[0] = connection;
+            get_robot_state()->mines_count = 1;
+
+            path_ended(MINE);
+            return;
+        }
+        if (!get_robot_state()->ignore_mines && is_point_equal(lee_to_index(path.points[i]), create_point(3, 2)) && is_point_equal(lee_to_index(path.points[i + 1]), create_point(4, 2))) {
+            struct PointConnection connection;
+            connection.point1 = create_point(3, 2);
+            connection.point2 = create_point(4, 2);
+            get_robot_state()->mines[0] = connection;
+            get_robot_state()->mines_count = 1;
+
+            path_ended(MINE);
+            return;
+        }
 #ifdef GUI
         gui_update();
 #endif

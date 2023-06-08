@@ -23,5 +23,6 @@ struct PathList {
 int calc_turns(struct Path *path);
 int get_point_connections_from_path(struct Path path, struct PointConnection* connections);
 struct Path lee_path_to_index(struct Path path);
+struct Path connect_paths(struct Path path1, struct Path path2);
 
 #endif //SRC_PATH_H

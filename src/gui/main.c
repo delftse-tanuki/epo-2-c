@@ -48,6 +48,7 @@ int main(void) {
     state.robot_state.last_reported_position.x = -1;
     state.robot_state.last_reported_position.y = 1;
     state.robot_state.mines_count = 0;
+    state.robot_state.ignore_mines = false;
 
     gui_initialize();
 

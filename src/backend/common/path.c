@@ -63,3 +63,17 @@ struct Path lee_path_to_index(struct Path path) {
     result.length = count;
     return result;
 }
+
+struct Path connect_paths(struct Path path1, struct Path path2) {
+    struct Path result;
+    result.length = path1.length + path2.length;
+    result.turns = path1.turns + path2.turns;
+    int i;
+    for (i = 0; i < path1.length; i++) {
+        result.points[i] = path1.points[i];
+    }
+    for (int j = 0; j < path2.length; j++) {
+        result.points[i + j] = path2.points[j];
+    }
+    return result;
+}

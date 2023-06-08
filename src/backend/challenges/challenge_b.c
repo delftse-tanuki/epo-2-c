@@ -1,4 +1,4 @@
-#include "challenge_a.h"
+#include "challenge_b.h"
 
 #include "../common/path.h"
 #ifdef FAKE_UART
@@ -9,27 +9,30 @@
 #include "challenge_signals.h"
 #include "../mazeRouter.h"
 
+#include "../../gui/gui.h"
+
 static struct Point stations[3];
 static int current_step;
 static bool active = false;
 
 static void path_ended(enum PathExecutionResult result);
+void sync_mazerouter_mines();
 
-void start_challenge_a(struct Point _station1, struct Point _station2, struct Point _station3) {
+void start_challenge_b(struct Point _station1, struct Point _station2, struct Point _station3) {
     struct Point stations_temp[3];
     stations_temp[0] = _station1;
     stations_temp[1] = _station2;
     stations_temp[2] = _station3;
     initUART();
 
-    get_robot_state()->major_failure = false;
-    get_robot_state()->ignore_mines = true;
     get_robot_state()->mines_count = 0;
-
+    get_robot_state()->major_failure = false;
+    get_robot_state()->ignore_mines = false;
     current_step = 0;
     active = true;
 
-    init_maze_router();
+    sync_mazerouter_mines();
+
 
     int possible_orders[6][3];
     struct Path possible_paths[6];
@@ -88,11 +91,18 @@ static void path_ended(enum PathExecutionResult result) {
         return;
     }
 
-    if (result != SUCCESS) {
+    if (result == FAILURE) {
         closeConnection();
         active = false;
         get_robot_state()->major_failure = true;
         challenge_ended();
+        return;
+    }
+
+    if (result == MINE) {
+        sync_mazerouter_mines();
+        struct Path path = calculate_route(index_to_lee(get_robot_state()->last_reported_position), index_to_lee(current_step == 0 ? stations[0] : (current_step == 1 ? stations[1] : stations[2])));
+        executePath(path, path_ended);
         return;
     }
 
@@ -124,5 +134,16 @@ static void path_ended(enum PathExecutionResult result) {
             challenge_ended();
             break;
         }
+    }
+}
+
+void sync_mazerouter_mines() {
+    init_maze_router();
+
+    for (int i = 0; i < get_robot_state()->mines_count; i++) {
+        struct PointConnection lee_mine;
+        lee_mine.point1 = index_to_lee(get_robot_state()->mines[i].point1);
+        lee_mine.point2 = index_to_lee(get_robot_state()->mines[i].point2);
+        add_point_connection_mine(&lee_mine);
     }
 }
