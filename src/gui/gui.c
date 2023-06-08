@@ -10,6 +10,7 @@
 #include "gui_helpers.h"
 #include "grid.h"
 #include "../backend/challenges/challenge_a.h"
+#include "../backend/challenges/challenge_b.h"
 
 struct AppState state;
 
@@ -23,7 +24,7 @@ struct ChallengeSetup {
 static struct ChallengeSetup challenge_setup = {false, {-1, -1}, {-1, -1}, {-1, -1}};
 
 void challenge_select_gui();
-void challenge_a_setup_gui(struct Point grid_selection, bool grid_selected);
+void challenge_ab_setup_gui(struct Point grid_selection, bool grid_selected);
 void challenge_progress_gui();
 void grid_gui(struct Point *selected_point, bool *grid_selected);
 void challenge_ended_callback();
@@ -43,6 +44,10 @@ void gui_update() {
             case CHALLENGE_A:
                 start_challenge_a(challenge_setup.station1, challenge_setup.station2, challenge_setup.station3);
                 break;
+            case CHALLENGE_B:
+                start_challenge_b(challenge_setup.station1, challenge_setup.station2, challenge_setup.station3);
+                break;
+
         }
         reset_challenge_setup();
     }
@@ -68,7 +73,10 @@ void gui_update() {
             case CHALLENGE_SETUP: {
                 switch (state.current_challenge) {
                     case CHALLENGE_A:
-                        challenge_a_setup_gui(grid_selection, grid_selected);
+                        challenge_ab_setup_gui(grid_selection, grid_selected);
+                        break;
+                    case CHALLENGE_B:
+                        challenge_ab_setup_gui(grid_selection, grid_selected);
                         break;
                 }
                 break;
@@ -134,7 +142,7 @@ void challenge_select_gui() {
     }
 }
 
-void challenge_a_setup_gui(struct Point grid_selection, bool grid_selected) {
+void challenge_ab_setup_gui(struct Point grid_selection, bool grid_selected) {
     if (grid_selected && grid_selection.x == -1 && grid_selection.y != -1) {
         if (challenge_setup.station1.y == -1) {
             challenge_setup.station1 = grid_selection;
@@ -153,7 +161,11 @@ void challenge_a_setup_gui(struct Point grid_selection, bool grid_selected) {
     }
 
     nk_layout_row_dynamic(state.ctx, 200, 1);
-    if (nk_group_begin(state.ctx, "Challenge A Setup", NK_WINDOW_TITLE)) {
+    char* label = "Challenge A Setup";
+    if (state.current_challenge == CHALLENGE_B) {
+        label = "Challenge B Setup";
+    }
+    if (nk_group_begin(state.ctx, label, NK_WINDOW_TITLE)) {
         nk_layout_row_dynamic(state.ctx, 120, 2);
         if (nk_group_begin(state.ctx, "checkpoint_list", 0)) {
             nk_layout_row_dynamic(state.ctx, 30, 1);

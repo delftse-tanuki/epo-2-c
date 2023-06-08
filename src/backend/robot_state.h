@@ -1,7 +1,3 @@
-//
-// Created by amara on 6/1/23.
-//
-
 #ifndef EPO2_ROBOT_STATE_H
 #define EPO2_ROBOT_STATE_H
 
@@ -21,6 +17,8 @@ struct RobotState {
     bool major_failure;
     // The mines that the robot has detected so far.
     struct PointConnection mines[100];
+    // Ignore mines?
+    bool ignore_mines;
     // How many mines have we found?
     int mines_count;
     // The path the robot is currently following.

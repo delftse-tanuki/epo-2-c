@@ -16,7 +16,8 @@ add_library(backend OBJECT
         challenges/challenge_a.c
         uart/fake_uart_handler.h
         uart/fake_uart_handler.c
-        )
+        challenges/challenge_b.h
+        challenges/challenge_b.c)
 
 if (UNIX)
     target_compile_definitions(backend PUBLIC FAKE_UART UNIX)
