@@ -5,6 +5,7 @@
 #include "uart.h"
 #include "../common/path.h"
 #include "UARTInstructions.h"
+#include "../challenges/challenge_signals.h"
 
 HANDLE hSerial;
 
@@ -88,19 +89,37 @@ void determineNextInstruction() {
     }
 }
 
-void executeInstructions(struct UARTInstruction instructions[], int length) {
+void executeInstructions(struct UARTInstruction instructions[], int length, void (*path_ended)(enum PathExecutionResult)) {
     char byteBuffer[BUFSIZ+1];
     char buffRead[BUFSIZ+1];
     int instructionSetIndex = 0;
     int lastInstruction = length;
+    byteBuffer[0] = STOP;
+    writeByte(hSerial, byteBuffer);
+    get_robot_state()->next_instruction = instructions[instructionSetIndex].instruction;
+    get_robot_state()->facing = instructions[instructionSetIndex].facing;
     while (1) {
+        get_robot_state()->data_received = false;
         readByte(hSerial, buffRead);
         if(buffRead[0] == 32) {
+            get_robot_state()->data_received = true;
+            get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex].point);
+            get_robot_state()->next_instruction = instructions[instructionSetIndex++].instruction;
+            get_robot_state()->facing = instructions[instructionSetIndex].facing;
             printf("Received confirmation\n");
-            byteBuffer[0] = instructions[instructionSetIndex++].instruction;
+            byteBuffer[0] = instructions[instructionSetIndex].instruction;
             writeByte(hSerial, byteBuffer);
         }
-        if(instructionSetIndex == lastInstruction) {
+        if(instructionSetIndex == lastInstruction - 1) {
+            byteBuffer[0] = STOP;
+            Sleep(50);
+            writeByte(hSerial, byteBuffer);
+            path_ended(SUCCESS);
+            break;
+        }
+        if(buffRead[0] == 33) {
+            printf("Received mine\n");
+            path_ended(MINE);
             break;
         }
         buffRead[0] = 0;
@@ -111,7 +130,9 @@ void executeInstructions(struct UARTInstruction instructions[], int length) {
  * Generate and execute the instructions for the robot.
  * @param path The path to follow.
  */
-void executePath(struct Path path) {
+void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult)) {
+    get_robot_state()->current_path = path;
+    get_robot_state()->last_reported_position = lee_to_index(path.points[0]);
     char byteBuffer[BUFSIZ+1];
     int i = 0;
     int instructionSetIndex = 0;
@@ -145,7 +166,7 @@ void executePath(struct Path path) {
         /* - Request a new route from the last crossing, which is still stored in "nextInstruction" */
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
-    executeInstructions(&instructionSet, instructionSetIndex);
+    executeInstructions(&instructionSet, instructionSetIndex, path_ended);
 }
 
 /**
