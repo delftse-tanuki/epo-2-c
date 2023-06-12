@@ -14,8 +14,6 @@ add_library(backend OBJECT
         challenges/challenge_signals.h
         challenges/challenge_signals.c
         challenges/challenge_a.c
-        uart/fake_uart_handler.h
-        uart/fake_uart_handler.c
         challenges/challenge_b.h
         challenges/challenge_b.c)
 

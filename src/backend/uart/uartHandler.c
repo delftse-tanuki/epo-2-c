@@ -6,6 +6,7 @@
 #include "../common/path.h"
 #include "UARTInstructions.h"
 #include "../challenges/challenge_signals.h"
+#include "../../gui/gui.h"
 
 HANDLE hSerial;
 
@@ -64,13 +65,15 @@ void determineNextInstruction() {
     }
 }
 
-void executeInstructions(struct UARTInstruction instructions[], int length, void (*path_ended)(enum PathExecutionResult)) {
+void executeInstructions(struct UARTInstruction instructions[], int length, int isLast, void (*path_ended)(enum PathExecutionResult)) {
     char byteBuffer[BUFSIZ+1];
     char buffRead[BUFSIZ+1];
     int instructionSetIndex = 0;
     int lastInstruction = length;
-    byteBuffer[0] = STOP;
-    writeByte(hSerial, byteBuffer);
+    if(isLast == 2) {
+        byteBuffer[0] = STOP;
+        writeByte(hSerial, byteBuffer);
+    }
     get_robot_state()->next_instruction = instructions[instructionSetIndex].instruction;
     get_robot_state()->facing = instructions[instructionSetIndex].facing;
     while (1) {
@@ -78,17 +81,20 @@ void executeInstructions(struct UARTInstruction instructions[], int length, void
         readByte(hSerial, buffRead);
         if(buffRead[0] == 32) {
             get_robot_state()->data_received = true;
-            get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex].point);
-            get_robot_state()->next_instruction = instructions[instructionSetIndex++].instruction;
-            get_robot_state()->facing = instructions[instructionSetIndex].facing;
+            get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex + 1].point);
+            get_robot_state()->next_instruction = instructions[instructionSetIndex + 1].instruction;
+            get_robot_state()->facing = instructions[instructionSetIndex + 1].facing;
             printf("Received confirmation\n");
             byteBuffer[0] = instructions[instructionSetIndex].instruction;
             writeByte(hSerial, byteBuffer);
+            instructionSetIndex++;
         }
         if(instructionSetIndex == lastInstruction - 1) {
-            byteBuffer[0] = STOP;
-            Sleep(50);
-            writeByte(hSerial, byteBuffer);
+            if(isLast == 1) {
+                byteBuffer[0] = STOP;
+                Sleep(500);
+                writeByte(hSerial, byteBuffer);
+            }
             path_ended(SUCCESS);
             break;
         }
@@ -98,6 +104,9 @@ void executeInstructions(struct UARTInstruction instructions[], int length, void
             break;
         }
         buffRead[0] = 0;
+#ifdef GUI
+        gui_update();
+#endif
     }
 }
 
@@ -105,7 +114,7 @@ void executeInstructions(struct UARTInstruction instructions[], int length, void
  * Generate and execute the instructions for the robot.
  * @param path The path to follow.
  */
-void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult)) {
+void executePath(struct Path path, int isLast, void (*path_ended)(enum PathExecutionResult)) {
     get_robot_state()->current_path = path;
     get_robot_state()->last_reported_position = lee_to_index(path.points[0]);
     char byteBuffer[BUFSIZ+1];
@@ -141,7 +150,7 @@ void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult))
         /* - Request a new route from the last crossing, which is still stored in "nextInstruction" */
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
-    executeInstructions(&instructionSet, instructionSetIndex, path_ended);
+    executeInstructions(&instructionSet, instructionSetIndex, isLast, path_ended);
 }
 
 /**
