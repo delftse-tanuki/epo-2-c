@@ -31,16 +31,13 @@ void determineFacing(struct Point startPoint, struct Point endPoint, int *facing
             /* The robot is driving NORTH */
             *facing = NORTH;
         }
-
-    } else {
         /* The car is driving horizontal */
-        if(startPoint.y < endPoint.y) {
-            /* The robot is driving EAST */
-            *facing = EAST;
-        } else {
-            /* The robot is driving WEST */
-            *facing = WEST;
-        }
+    } else if(startPoint.y < endPoint.y) {
+        /* The robot is driving EAST */
+        *facing = EAST;
+    } else {
+        /* The robot is driving WEST */
+        *facing = WEST;
     }
 }
 
@@ -50,42 +47,20 @@ void determineFacing(struct Point startPoint, struct Point endPoint, int *facing
 void determineNextInstruction() {
     if(facing == nextFacing) {
         nextInstruction = FORWARD;
-    } else if(facing == NORTH) {
-        switch(nextFacing) {
-            case EAST:
-                nextInstruction = RIGHT;
-                break;
-            case WEST:
-                nextInstruction = LEFT;
-                break;
-        }
-    } else if (facing == EAST) {
-        switch(nextFacing) {
-            case NORTH:
-                nextInstruction = LEFT;
-                break;
-            case SOUTH:
-                nextInstruction = RIGHT;
-                break;
-        }
-    } else if (facing == SOUTH) {
-        switch(nextFacing) {
-            case WEST:
-                nextInstruction = RIGHT;
-                break;
-            case EAST:
-                nextInstruction = LEFT;
-                break;
-        }
-    } else if(facing == WEST) {
-        switch(nextFacing) {
-            case NORTH:
-                nextInstruction = RIGHT;
-                break;
-            case SOUTH:
-                nextInstruction = LEFT;
-                break;
-        }
+    } else if(
+        (facing == NORTH && nextFacing == EAST) || 
+        (facing == EAST && nextFacing == SOUTH) || 
+        (facing == SOUTH && nextFacing == WEST) || 
+        (facing == WEST && nextFacing == NORTH)
+    ) {
+        nextInstruction = RIGHT;
+    } else if (
+        (facing == NORTH && nextFacing == EAST) || 
+        (facing == EAST && nextFacing == SOUTH) || 
+        (facing == SOUTH && nextFacing == WEST) || 
+        (facing == WEST && nextFacing == NORTH)
+    ) {
+        nextInstruction = LEFT;
     }
 }
 
