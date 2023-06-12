@@ -36,7 +36,7 @@ void challengeAB() {
         printf("(%d, %d), ", path.points[i].x, path.points[i].y);
     }
 
-    executePath(path);
+    //executePath(path);
     printf("\n\n");
 }
 

@@ -8,7 +8,7 @@
 #include "UARTInstructions.h"
 
 void initUART();
-void executePath(struct Path path, void (*path_ended)(enum PathExecutionResult));
+void executePath(struct Path path, int isLast, void (*path_ended)(enum PathExecutionResult));
 void closeConnection();
 
 #endif //SRC_UARTHANDLER_H
