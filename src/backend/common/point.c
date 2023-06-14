@@ -150,3 +150,19 @@ struct Point create_point(int x, int y) {
     result.y = y;
     return result;
 }
+
+struct PointConnection create_point_connection(struct Point point1, struct Point point2) {
+    struct PointConnection result;
+    result.point1 = point1;
+    result.point2 = point2;
+    return result;
+}
+
+struct PointConnection create_point_connection_shorthand(int x1, int y1, int x2, int y2) {
+    struct PointConnection result;
+    result.point1.x = x1;
+    result.point1.y = y1;
+    result.point2.x = x2;
+    result.point2.y = y2;
+    return result;
+}

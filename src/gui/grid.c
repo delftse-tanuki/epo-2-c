@@ -22,7 +22,8 @@ enum LineState {
     NORMAL,
     HIGHLIGHTED,
     CURRENT,
-    BLOCKED
+    BLOCKED,
+    TREASURE
 };
 
 struct PointConnection get_line_path(int i, int j) {
@@ -84,6 +85,9 @@ void draw_grid_edge(struct nk_context *ctx, enum LineKind line_kind, enum LineSt
         case CURRENT:
             color = nk_rgb(255, 60, 255);
             break;
+        case TREASURE:
+            color = nk_rgb(183, 206, 55);
+            break;
     }
 
     nk_stroke_line(canvas, x0, y0, x1, y1, 5.0f, color);
@@ -94,7 +98,7 @@ bool should_be_highlighted(int x, int y, struct Point point) {
 }
 
 struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointConnection *mines, int mine_count,
-                       bool *selected, struct Point robot_position) {
+                       bool *selected, struct Point robot_position, struct PointConnection* treasures, int treasure_count) {
     struct Point selection;
     *selected = false;
 
@@ -236,6 +240,7 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
                 line_state = HIGHLIGHTED;
             }
 
+
             draw_grid_edge(ctx, HORIZONTAL, line_state);
         } else {
             draw_empty_space(ctx);
@@ -247,7 +252,10 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             } else if (i % 2) {
                 enum LineState line_state = NORMAL;
                 struct PointConnection line_connection = get_line_path(i, j);
-                if (is_connection_in_array(line_connection, mines, mine_count)) {
+                if (is_connection_in_array(line_connection, treasures, treasure_count)) {
+                    line_state = TREASURE;
+                }
+                else if (is_connection_in_array(line_connection, mines, mine_count)) {
                     line_state = BLOCKED;
                 }
                 else if (is_connection_in_array(line_connection, connections, connection_count)) {
@@ -257,7 +265,10 @@ struct Point draw_grid(struct nk_context *ctx, struct Path path, struct PointCon
             } else if (j % 2) {
                 enum LineState line_state = NORMAL;
                 struct PointConnection line_connection = get_line_path(i, j);
-                if (is_connection_in_array(line_connection, mines, mine_count)) {
+                if (is_connection_in_array(line_connection, treasures, treasure_count)) {
+                    line_state = TREASURE;
+                }
+                else if (is_connection_in_array(line_connection, mines, mine_count)) {
                     line_state = BLOCKED;
                 }
                 else if (is_connection_in_array(line_connection, connections, connection_count)) {

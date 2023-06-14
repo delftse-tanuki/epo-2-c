@@ -23,6 +23,10 @@ struct RobotState {
     int mines_count;
     // The path the robot is currently following.
     struct Path current_path;
+    // The treasures we've found so far.
+    struct PointConnection treasures[3];
+    // The amount of treasures we've found.
+    int treasure_count;
 };
 
 #endif //EPO2_ROBOT_STATE_H

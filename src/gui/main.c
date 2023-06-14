@@ -54,7 +54,7 @@ int main(void) {
 
     // Main loop.
     while (!glfwWindowShouldClose(state.window)) {
-        gui_update();
+        gui_update(NULL);
     }
 
     nk_glfw3_shutdown();

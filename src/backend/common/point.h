@@ -32,6 +32,8 @@ struct Point crossing_to_index(struct Point point);
 struct Point index_to_lee(struct Point point);
 struct Point lee_to_index(struct Point point);
 struct Point create_point(int x, int y);
+struct PointConnection create_point_connection(struct Point point1, struct Point point2);
+struct PointConnection create_point_connection_shorthand(int x1, int y1, int x2, int y2);
 void get_lee_name(struct Point point, char* result);
 
 #endif //SRC_POINT_H

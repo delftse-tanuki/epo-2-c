@@ -1,5 +1,6 @@
 #include "challenge_a.h"
 
+#include <stddef.h>
 #include "../common/path.h"
 #ifdef FAKE_UART
 #include "../uart/fake_uart_handler.h"
@@ -80,7 +81,14 @@ void start_challenge_a(struct Point _station1, struct Point _station2, struct Po
     stations[2] = stations_temp[possible_orders[shortest_path][2]];
 
     struct Path path = calculate_route(index_to_lee(create_point(-1, 1)), index_to_lee(stations[0]));
-    executePath(path, 2, path_ended);
+    executePath(path, 2, path_ended, NULL);
+}
+
+void stop_challenge_a(bool failure) {
+    closeConnection();
+    active = false;
+    get_robot_state()->major_failure = failure;
+    challenge_ended();
 }
 
 static void path_ended(enum PathExecutionResult result) {
@@ -89,10 +97,7 @@ static void path_ended(enum PathExecutionResult result) {
     }
 
     if (result != SUCCESS) {
-        closeConnection();
-        active = false;
-        get_robot_state()->major_failure = true;
-        challenge_ended();
+        stop_challenge_a(true);
         return;
     }
 
@@ -100,28 +105,23 @@ static void path_ended(enum PathExecutionResult result) {
         case 0: {
             current_step = 1;
             struct Path path = calculate_route(index_to_lee(stations[0]), index_to_lee(stations[1]));
-            executePath(path, 0, path_ended);
+            executePath(path, 0, path_ended, NULL);
             break;
         }
         case 1: {
             current_step = 2;
             struct Path path = calculate_route(index_to_lee(stations[1]), index_to_lee(stations[2]));
-            executePath(path, 1, path_ended);
+            executePath(path, 1, path_ended, NULL);
             break;
         }
         case 2: {
             current_step = 3;
-            closeConnection();
-            active = false;
-            get_robot_state()->major_failure = false;
-            challenge_ended();
+            stop_challenge_a(false);
             break;
         }
 
         default: {
-            closeConnection();
-            get_robot_state()->major_failure = true;
-            challenge_ended();
+            stop_challenge_a(true);
             break;
         }
     }

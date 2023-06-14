@@ -65,7 +65,7 @@ void determineNextInstruction() {
     }
 }
 
-void executeInstructions(struct UARTInstruction instructions[], int length, int isLast, void (*path_ended)(enum PathExecutionResult)) {
+void executeInstructions(struct UARTInstruction instructions[], int length, int isLast, void (*path_ended)(enum PathExecutionResult), void (*robot_moved)(struct PointConnection movement)) {
     char byteBuffer[BUFSIZ+1];
     char buffRead[BUFSIZ+1];
     int instructionSetIndex = 0;
@@ -81,6 +81,9 @@ void executeInstructions(struct UARTInstruction instructions[], int length, int 
         readByte(hSerial, buffRead);
         if(buffRead[0] == 32) {
             get_robot_state()->data_received = true;
+            if (robot_moved != NULL) {
+                robot_moved(create_point_connection(get_robot_state()->last_reported_position, lee_to_index(instructions[instructionSetIndex + 1].point)));
+            }
             get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex + 1].point);
             get_robot_state()->next_instruction = instructions[instructionSetIndex + 1].instruction;
             get_robot_state()->facing = instructions[instructionSetIndex + 1].facing;
@@ -105,7 +108,11 @@ void executeInstructions(struct UARTInstruction instructions[], int length, int 
         }
         buffRead[0] = 0;
 #ifdef GUI
-        gui_update();
+        bool call_for_abort = false;
+        gui_update(&call_for_abort);
+        if (call_for_abort) {
+            return;
+        }
 #endif
     }
 }
@@ -114,7 +121,7 @@ void executeInstructions(struct UARTInstruction instructions[], int length, int 
  * Generate and execute the instructions for the robot.
  * @param path The path to follow.
  */
-void executePath(struct Path path, int isLast, void (*path_ended)(enum PathExecutionResult)) {
+void executePath(struct Path path, int isLast, void (*path_ended)(enum PathExecutionResult), void (*robot_moved)(struct PointConnection movement)) {
     get_robot_state()->current_path = path;
     get_robot_state()->last_reported_position = lee_to_index(path.points[0]);
     char byteBuffer[BUFSIZ+1];
@@ -150,7 +157,7 @@ void executePath(struct Path path, int isLast, void (*path_ended)(enum PathExecu
         /* - Request a new route from the last crossing, which is still stored in "nextInstruction" */
         /* - Stop this instance of executePath and start a new one, however make sure that the facing is remembered and turned 180 degrees! */
     }
-    executeInstructions(&instructionSet, instructionSetIndex, isLast, path_ended);
+    executeInstructions(&instructionSet, instructionSetIndex, isLast, path_ended, robot_moved);
 }
 
 /**
