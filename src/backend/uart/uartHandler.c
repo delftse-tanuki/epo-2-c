@@ -106,13 +106,13 @@ void executeInstructions(struct UARTInstruction instructions[], int length, int 
         readByte(hSerial, buffRead);
         if(buffRead[0] == 32) {
             get_robot_state()->data_received = true;
-            get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex + 1].point);
-            get_robot_state()->next_instruction = instructions[instructionSetIndex + 1].instruction;
-            get_robot_state()->facing = instructions[instructionSetIndex + 1].facing;
             printf("Received confirmation\n");
             byteBuffer[0] = instructions[instructionSetIndex].instruction;
             writeByte(hSerial, byteBuffer);
             instructionSetIndex++;
+            get_robot_state()->last_reported_position = lee_to_index(instructions[instructionSetIndex].point);
+            get_robot_state()->next_instruction = instructions[instructionSetIndex].instruction;
+            get_robot_state()->facing = instructions[instructionSetIndex].facing;
         }
         if(instructionSetIndex == lastInstruction - 1) {
             if(isLast == 1) {
