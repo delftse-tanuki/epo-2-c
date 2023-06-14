@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "challenge_b.h"
 
 #include "../common/path.h"
@@ -9,14 +10,12 @@
 #include "challenge_signals.h"
 #include "../mazeRouter.h"
 
-#include "../../gui/gui.h"
-
 static struct Point stations[3];
 static int current_step;
 static bool active = false;
 
 static void path_ended(enum PathExecutionResult result);
-void sync_mazerouter_mines();
+static void sync_mazerouter_mines();
 
 void start_challenge_b(struct Point _station1, struct Point _station2, struct Point _station3) {
     struct Point stations_temp[3];
@@ -83,7 +82,14 @@ void start_challenge_b(struct Point _station1, struct Point _station2, struct Po
     stations[2] = stations_temp[possible_orders[shortest_path][2]];
 
     struct Path path = calculate_route(index_to_lee(create_point(-1, 1)), index_to_lee(stations[0]));
-    executePath(path, 2, path_ended);
+    executePath(path, 2, path_ended, NULL);
+}
+
+void stop_challenge_b(bool failure) {
+    closeConnection();
+    active = false;
+    get_robot_state()->major_failure = failure;
+    challenge_ended();
 }
 
 static void path_ended(enum PathExecutionResult result) {
@@ -92,17 +98,14 @@ static void path_ended(enum PathExecutionResult result) {
     }
 
     if (result == FAILURE) {
-        closeConnection();
-        active = false;
-        get_robot_state()->major_failure = true;
-        challenge_ended();
+        stop_challenge_b(true);
         return;
     }
 
     if (result == MINE) {
         sync_mazerouter_mines();
         struct Path path = calculate_route(index_to_lee(get_robot_state()->last_reported_position), index_to_lee(current_step == 0 ? stations[0] : (current_step == 1 ? stations[1] : stations[2])));
-        executePath(path, 0, path_ended);
+        executePath(path, 0, path_ended, NULL);
         return;
     }
 
@@ -110,34 +113,29 @@ static void path_ended(enum PathExecutionResult result) {
         case 0: {
             current_step = 1;
             struct Path path = calculate_route(index_to_lee(stations[0]), index_to_lee(stations[1]));
-            executePath(path, 0, path_ended);
+            executePath(path, 0, path_ended, NULL);
             break;
         }
         case 1: {
             current_step = 2;
             struct Path path = calculate_route(index_to_lee(stations[1]), index_to_lee(stations[2]));
-            executePath(path, 0, path_ended);
+            executePath(path, 0, path_ended, NULL);
             break;
         }
         case 2: {
             current_step = 3;
-            closeConnection();
-            active = false;
-            get_robot_state()->major_failure = false;
-            challenge_ended();
+            stop_challenge_b(false);
             break;
         }
 
         default: {
-            closeConnection();
-            get_robot_state()->major_failure = true;
-            challenge_ended();
+            stop_challenge_b(true);
             break;
         }
     }
 }
 
-void sync_mazerouter_mines() {
+static void sync_mazerouter_mines() {
     init_maze_router();
 
     for (int i = 0; i < get_robot_state()->mines_count; i++) {

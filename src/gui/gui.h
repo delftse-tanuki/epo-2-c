@@ -24,6 +24,6 @@ struct AppState {
 extern struct AppState state;
 
 void gui_initialize();
-void gui_update();
+void gui_update(bool* call_for_abort);
 
 #endif //EPO2_GUI_H
